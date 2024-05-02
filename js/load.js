@@ -30,51 +30,114 @@ function checkPathnameParts(pathnameParts) {
     }
     return [valid, status, message];
 }
+class Routes {
+    root(pathnameParts) {
+        return __awaiter(this, void 0, void 0, function* () {
+            console.log("root callback");
+        });
+    }
+    wiki(pathnameParts) {
+        return __awaiter(this, void 0, void 0, function* () {
+            console.log("wiki callback");
+            // TODO: Fix this since there is an actual router now.
+            const [isPathnameValid, _, pathnameMessage] = checkPathnameParts(pathnameParts);
+            if (!isPathnameValid) {
+                alert(pathnameMessage);
+                return;
+            }
+            const baseUrl = `https://raw.githubusercontent.com/diswiki/database/main/${pathnameParts[1]}s/${pathnameParts[2]}`;
+            let informationData = {};
+            let sidebarData = {};
+            let contentData = "";
+            try {
+                const fetchData = (endpoint) => __awaiter(this, void 0, void 0, function* () {
+                    const response = yield fetch(`${baseUrl}/${endpoint}`);
+                    if (!response.ok) {
+                        if (response.status === 404) {
+                            throw new Error(`${pathnameParts[1]} with id ${pathnameParts[2]} could not be found!`);
+                        }
+                        else {
+                            throw new Error('Failed to fetch data');
+                        }
+                    }
+                    return response;
+                });
+                const [informationResponse, sidebarResponse, contentResponse] = yield Promise.all([
+                    fetchData('information.json'),
+                    fetchData('sidebar.json'),
+                    fetchData('content.md')
+                ]);
+                informationData = yield informationResponse.json();
+                sidebarData = yield sidebarResponse.json();
+                contentData = yield contentResponse.text();
+            }
+            catch (error) {
+                alert(error.message);
+                console.error(error);
+                return;
+            }
+            console.log(informationData);
+            console.log(sidebarData);
+            console.log(contentData);
+        });
+    }
+}
 window.addEventListener('load', () => __awaiter(this, void 0, void 0, function* () {
     console.log("DisWiki.");
+    const pathname = window.location.pathname.toLowerCase();
     const pathnameParts = window.location.pathname.toLowerCase().split('/').slice(1);
-    if (["index", "/", ""].includes(pathnameParts[0].split('.')[0])) {
-        return;
-    }
-    const [isPathnameValid, _, pathnameMessage] = checkPathnameParts(pathnameParts);
-    if (!isPathnameValid) {
-        alert(pathnameMessage);
-        return;
-    }
-    console.log(pathnameParts);
-    const baseUrl = `https://raw.githubusercontent.com/diswiki/database/main/${pathnameParts[1]}s/${pathnameParts[2]}`;
-    let informationData = {};
-    let sidebarData = {};
-    let contentData = "";
-    try {
-        const fetchData = (endpoint) => __awaiter(this, void 0, void 0, function* () {
-            const response = yield fetch(`${baseUrl}/${endpoint}`);
-            if (!response.ok) {
-                if (response.status === 404) {
-                    throw new Error(`${pathnameParts[1]} with id ${pathnameParts[2]} could not be found!`);
-                }
-                else {
-                    throw new Error('Failed to fetch data');
-                }
+    const routes = new Routes();
+    // TODO: Account for variable paths
+    const mappings = [
+        {
+            "path": "/", // Doesnt work in this configuration, however, it will later.
+            "callback": routes.root
+        },
+        {
+            "path": "/index",
+            "callback": routes.root
+        },
+        {
+            "path": "",
+            "callback": routes.root
+        },
+        {
+            "path": "/wiki",
+            "callback": routes.wiki
+        }
+    ];
+    let validRoute = false;
+    for (let i = 0; i < mappings.length; i++) {
+        console.log(`Routing -> ${mappings[i].path} : ${pathname}`);
+        const route = mappings[i].path;
+        if (route.endsWith("*")) {
+            const prefix = route.slice(0, -1);
+            if (pathname.startsWith(prefix)) {
+                validRoute = true;
+                const wildcardValue = pathname.slice(prefix.length);
+                yield mappings[i].callback(pathnameParts);
+                break;
             }
-            return response;
-        });
-        const [informationResponse, sidebarResponse, contentResponse] = yield Promise.all([
-            fetchData('information.json'),
-            fetchData('sidebar.json'),
-            fetchData('content.md')
-        ]);
-        informationData = yield informationResponse.json();
-        sidebarData = yield sidebarResponse.json();
-        contentData = yield contentResponse.text();
+        }
+        else if (route === pathname) {
+            validRoute = true;
+            yield mappings[i].callback(pathnameParts);
+            break;
+        }
     }
-    catch (error) {
-        alert(error.message);
-        console.error(error);
-        return;
+    // for (var i = 0; i < mappings.length; i++) {
+    //     console.log(`Routing -> ${mappings[i].path} : ${pathname}`);
+    //     if (mappings[i].path === pathname) {
+    //         validRoute = true;
+    //         await mappings[i].callback(pathnameParts);
+    //         break;
+    //     }
+    // }
+    if (!validRoute) {
+        let httpCat = document.createElement('img');
+        httpCat.src = "https://http.cat/404.jpg";
+        document.body.appendChild(httpCat);
     }
-    console.log(informationData);
-    console.log(sidebarData);
-    console.log(contentData);
-    // TODO: move this to the API, better error handling, and finally create the elements
+    // user/975974400941756416
+    console.log(pathnameParts);
 }));

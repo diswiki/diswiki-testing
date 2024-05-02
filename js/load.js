@@ -23,7 +23,7 @@ function checkPathnameParts(pathnameParts) {
         status = 404;
         message = `You can only request a user or a server from the wiki, not "${second}"!`;
     }
-    else if (third === undefined) {
+    else if ([undefined, ""].includes(third)) {
         valid = false;
         status = 400;
         message = "You must request a resource from the wiki! It cannot be blank.";
@@ -76,4 +76,5 @@ window.addEventListener('load', () => __awaiter(this, void 0, void 0, function* 
     console.log(informationData);
     console.log(sidebarData);
     console.log(contentData);
+    // TODO: move this to the API, better error handling, and finally create the elements
 }));

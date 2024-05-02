@@ -14,7 +14,7 @@ function checkPathnameParts(pathnameParts: string[]): [boolean, number, string] 
         valid = false;
         status = 404;
         message = `You can only request a user or a server from the wiki, not "${second}"!`;
-    } else if (third === undefined) {
+    } else if ([undefined, ""].includes(third)) {
         valid = false;
         status = 400;
         message = "You must request a resource from the wiki! It cannot be blank.";

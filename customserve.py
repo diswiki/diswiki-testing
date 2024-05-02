@@ -13,7 +13,13 @@ class CustomHandler(SimpleHTTPRequestHandler):
             f = open(os.path.join(root, self.path[1:]), 'rb')
 
             self.send_response(200)
-            self.send_header('Content-type', 'text/html')
+            if ".js" in self.path:
+                mime_type = "text/javascript"
+            elif ".css" in self.path:
+                mime_type = "text/css"
+            else:
+                mime_type = "text/html"
+            self.send_header('Content-type', mime_type)
             self.end_headers()
 
             self.wfile.write(f.read())

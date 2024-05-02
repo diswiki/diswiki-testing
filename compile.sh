@@ -1,1 +1,2 @@
-npx tsc --target es2016 --outFile js/load.js ts/load.ts
+
+npx tsc --target es2016 --module commonjs --outDir js/ --strict ts/*.ts

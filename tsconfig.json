@@ -1,0 +1,10 @@
+{
+    "compilerOptions": {
+      "target": "es2016",
+      "module": "es6",
+      "outDir": "js",
+      "strict": true,
+      "allowSyntheticDefaultImports": true
+    }
+  }
+  

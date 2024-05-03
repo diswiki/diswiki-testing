@@ -1,4 +1,4 @@
-import { Routes, route } from "./routing";
+import { Routes, route } from "./wikiRouting";
 
 console.log("Waiting for window to load.");
 

@@ -1,5 +1,12 @@
 {
   "dependencies": {
+    "@rollup/plugin-node-resolve": "^15.2.3",
+    "@rollup/plugin-typescript": "^11.1.6",
+    "@ts-stack/markdown": "^1.5.0",
+    "@types/dompurify": "^3.0.5",
+    "dompurify": "^3.1.2",
+    "rollup": "^4.17.2",
+    "tslib": "^2.6.2",
     "typescript": "^5.4.5"
   }
 }

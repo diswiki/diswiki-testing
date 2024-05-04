@@ -53,7 +53,7 @@ class WikiController implements RouteControllerTemplate {
 
 
         try {
-            const templateReponse = await fetch(`https://raw.githubusercontent.com/diswiki/resources/main/${pathnameParts[0]}/template/template.html`);
+            const templateReponse = await fetch("https://raw.githubusercontent.com/diswiki/resources/main/templates/wiki.html");
             if (!templateReponse.ok) {
                 if (templateReponse.status === 404) {
                     throw new Error(

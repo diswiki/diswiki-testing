@@ -2941,7 +2941,7 @@ ${body}</tbody>
                 // console.log(sidebarData);
                 // console.log(contentData);
                 try {
-                    const templateReponse = yield fetch(`https://raw.githubusercontent.com/diswiki/resources/main/${pathnameParts[0]}/template/template.html`);
+                    const templateReponse = yield fetch("https://raw.githubusercontent.com/diswiki/resources/main/templates/wiki.html");
                     if (!templateReponse.ok) {
                         if (templateReponse.status === 404) {
                             throw new Error(`${pathnameParts[0]} template could not be found!`);

@@ -2,6 +2,8 @@
 
 DisWiki is still in active development.
 
+### This is the old repo, moving to actual next.js app
+
 ### To-do
 1. mockups (make a couple more for home page)
 2. clean up code

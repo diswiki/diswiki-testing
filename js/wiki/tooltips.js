@@ -1,3 +1,4 @@
+const sleep = ms => new Promise(r => setTimeout(r, ms));
 
 var tooltipMapping = [
     {
@@ -35,7 +36,7 @@ var tooltipMapping = [
 
 ];
 
-console.log(`Setting up ${tooltipMapping.length} tooltip(s).`);
+console.log('Setting up tooltip(s).');
 
 for (var i = 0; i < tooltipMapping.length; i++) {
     currentToolip = tooltipMapping[i];
@@ -47,8 +48,18 @@ for (var i = 0; i < tooltipMapping.length; i++) {
         continue;
     }
     tippy(currentToolip.id, {
-        content: currentToolip.content
+        content: currentToolip.content,
+        interactive: true,
     });
 }
 
-console.log(`Finished setting up ${tooltipMapping.length} tooltip(s).`);
+const iShouldRewriteThis = document.querySelectorAll('.js-has-tooltip');
+for (let j = 0; j < iShouldRewriteThis.length; j++) {
+    const element = iShouldRewriteThis[j];
+    tippy(element, {
+        content: element.getAttribute('data-tooltip'),
+        interactive: true,
+    });
+}
+
+console.log('Finished setting up tooltip(s).');

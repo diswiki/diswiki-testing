@@ -2967,6 +2967,7 @@ ${body}</tbody>
     function truncate(str, n) {
         return (str.length > n) ? str.slice(0, n - 1) + '...' : str;
     }
+
     class WikiImage extends HTMLElement {
         constructor() {
             super();
@@ -3077,6 +3078,7 @@ ${body}</tbody>
         }
         displayWikiPage(pageData, pageType, id, template) {
             return __awaiter(this, void 0, void 0, function* () {
+                var _a, _b;
                 const [informationData, sidebarData, contentData] = pageData;
                 console.log(informationData);
                 const contentDiv = document.getElementById("content");
@@ -3135,14 +3137,20 @@ ${body}</tbody>
                     "br",
                     "p",
                     "a",
+                    "tbody",
                     "table",
                     "tr",
                     "th",
                     "td",
                     "img",
                     "i",
+                    "em",
+                    "b",
                     "strong",
-                    "u"
+                    "u",
+                    "ol",
+                    "ul",
+                    "li"
                 ];
                 const allowedAttr = [
                     "file",
@@ -3152,23 +3160,24 @@ ${body}</tbody>
                 ];
                 const serverInfo = yield fetchServerDetails(informationData.invite);
                 wikiElements.pageTitle.textContent = informationData.name;
+                wikiElements.content.innerHTML = purify.sanitize(Marked.parse(contentData), {
+                    ALLOWED_TAGS: allowedTags,
+                    ADD_ATTR: allowedAttr
+                });
+                // wikiElements.content!.innerHTML = Marked.parse(contentData);
                 wikiElements.likeCount.textContent = `${informationData.likes} ${informationData.likes === 1 ? 'like' : 'likes'}`;
                 wikiElements.shareCount.textContent = `${informationData.shares} ${informationData.shares === 1 ? 'share' : 'shares'}`;
                 wikiElements.readTime.textContent = `${avgReadTime(contentData)} minute read`;
                 let leTime = formatTimestamp(informationData.last_updated, "relative");
                 wikiElements.lastEdited.textContent = `Last Edited: ${leTime}`;
                 wikiElements.lastEdited.setAttribute('data-tooltip', formatTimestamp(informationData.last_updated, "normaltime"));
-                wikiElements.content.innerHTML = purify.sanitize(Marked.parse(contentData), {
-                    ALLOWED_TAGS: allowedTags,
-                    ADD_ATTR: allowedAttr
-                });
                 wikiElements.serverIcon.setAttribute('src', serverInfo.icon);
                 wikiElements.memberCount.textContent = serverInfo.members.toString();
                 wikiElements.membersOnline.textContent = serverInfo.online.toString();
                 //@ts-ignore
                 wikiElements.serverCreation.textContent = formatTimestamp(informationData.creation.server, "normal");
                 //@ts-ignore
-                const [daysSince, monthsSince, yearsSince] = timeSinceTimestamp(informationData.creation.server);
+                let [daysSince, monthsSince, yearsSince] = timeSinceTimestamp(informationData.creation.server);
                 let timeSince = `${daysSince} ${daysSince === 1 ? 'day' : 'days'}`;
                 if (daysSince > 180) {
                     timeSince = `${monthsSince} ${monthsSince === 1 ? 'month' : 'months'}`;
@@ -3189,8 +3198,6 @@ ${body}</tbody>
                 serverOwnerUserAnchor.target = '_blank';
                 //@ts-ignore
                 serverOwnerUserAnchor.href = `/user/${informationData.auth.server_owner.toString()}`;
-                //@ts-ignore
-                alert(informationData.auth.server_owner.toString());
                 serverOwnerUser.appendChild(serverOwnerUserAnchor);
                 const serverOwnerParent = wikiElements.serverOwner.parentElement;
                 serverOwnerParent.removeChild(wikiElements.serverOwner);
@@ -3211,6 +3218,183 @@ ${body}</tbody>
                 wikiOwnerParent.appendChild(wikiOwnerUser);
                 wikiOwnerParent.id = "wiki-sidebar-wiki-owner";
                 wikiOwnerParent.setAttribute('data-tooltip', wikiOwnerId);
+                //@ts-ignore
+                const wikiAdmins = informationData.auth.wiki_admins;
+                if (wikiAdmins.length > 0) {
+                    let adminTd = (_a = wikiElements.wikiAdminsRow) === null || _a === void 0 ? void 0 : _a.children[1];
+                    console.log(`admintd: ${adminTd}`);
+                    adminTd.innerHTML = '';
+                    for (let i = 0; i < wikiAdmins.length; i++) {
+                        let admin = wikiAdmins[i];
+                        let adminEl = document.createElement('wiki-user');
+                        let adminElAnchor = document.createElement('a');
+                        adminElAnchor.textContent = truncate(admin, 10);
+                        adminElAnchor.href = `/user/${admin}`;
+                        adminElAnchor.target = '_blank';
+                        adminEl.appendChild(adminElAnchor);
+                        adminEl.classList.add('js-has-tooltip');
+                        adminEl.setAttribute('data-tooltip', admin);
+                        adminTd === null || adminTd === void 0 ? void 0 : adminTd.appendChild(adminEl);
+                    }
+                }
+                else {
+                    (_b = wikiElements.wikiAdminsRow) === null || _b === void 0 ? void 0 : _b.remove();
+                }
+                //@ts-ignore
+                wikiElements.wikiCreation.textContent = formatTimestamp(informationData.creation.wiki, "normal");
+                wikiElements.wikiCreation.classList.add('js-has-tooltip');
+                //@ts-ignore
+                wikiElements.wikiCreation.setAttribute('data-tooltip', formatTimestamp(informationData.creation.wiki, "normaltime"));
+                // Actions
+                wikiElements.joinButton.setAttribute('href', `https://discord.gg/${informationData.invite}`);
+                // TODO: Optimize
+                // Function to convert a string to a valid ID format
+                function toValidId(str) {
+                    return str.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
+                }
+                // Function to create a unique ID based on existing IDs
+                function getUniqueId(id, existingIds) {
+                    let newId = id;
+                    let count = 2;
+                    while (existingIds.has(newId)) {
+                        newId = `${id}-${count}`;
+                        count++;
+                    }
+                    return newId;
+                }
+                // Function to create the table of contents
+                // function createTableOfContents() {
+                //     const content = wikiElements.content!;
+                //     const toc = wikiElements.tableOfContents!;
+                //     const headers = content.querySelectorAll('h1, h2, h3, h4, h5, h6');
+                //     const existingIds = new Set<string>();
+                //     let currentList: HTMLElement = toc;
+                //     let currentHeaderLevel: number = 1;
+                //     let summaryDetails: HTMLElement | null = null;
+                //     headers.forEach(header => {
+                //         if (header.id === 'to-top') return;
+                //         const id = toValidId(header.textContent!);
+                //         const uniqueId = getUniqueId(id, existingIds);
+                //         existingIds.add(uniqueId);
+                //         const link = document.createElement('a');
+                //         link.href = `#${uniqueId}`;
+                //         link.textContent = header.textContent!;
+                //         const listItem = document.createElement('li');
+                //         listItem.appendChild(link);
+                //         const headerLevel = parseInt(header.tagName.substring(1));
+                //         if (headerLevel === currentHeaderLevel) {
+                //             currentList.appendChild(listItem);
+                //         } else if (headerLevel > currentHeaderLevel) {
+                //             const ol = document.createElement('ol');
+                //             currentList.lastElementChild!.appendChild(ol);
+                //             currentList = ol;
+                //             currentList.appendChild(listItem);
+                //             currentHeaderLevel = headerLevel;
+                //         } else {
+                //             while (currentHeaderLevel > headerLevel) {
+                //                 currentList = currentList.parentElement!.parentElement as HTMLElement;
+                //                 currentHeaderLevel--;
+                //             }
+                //             currentList.appendChild(listItem);
+                //         }
+                //         header.id = uniqueId;
+                //     });
+                // }
+                // function createTableOfContents() {
+                //     const content = wikiElements.content!;
+                //     const toc = wikiElements.tableOfContents!;
+                //     const headers = content.querySelectorAll('h1, h2, h3, h4, h5, h6');
+                //     const existingIds = new Set<string>();
+                //     let currentList: HTMLElement = toc;
+                //     let currentHeaderLevel: number = 1;
+                //     let lastListItem: HTMLElement | null = null;
+                //     headers.forEach(header => {
+                //         const id = toValidId(header.textContent!);
+                //         const uniqueId = getUniqueId(id, existingIds);
+                //         existingIds.add(uniqueId);
+                //         const link = document.createElement('a');
+                //         link.href = `#${uniqueId}`;
+                //         link.textContent = header.textContent!;
+                //         const listItem = document.createElement('li');
+                //         listItem.appendChild(link);
+                //         const headerLevel = parseInt(header.tagName.substring(1));
+                //         if (headerLevel === currentHeaderLevel) {
+                //             currentList.appendChild(listItem);
+                //         } else if (headerLevel > currentHeaderLevel) {
+                //             const ol = document.createElement('ol');
+                //             lastListItem!.appendChild(ol);
+                //             currentList = ol;
+                //             currentList.appendChild(listItem);
+                //             currentHeaderLevel = headerLevel;
+                //         } else {
+                //             let diff = currentHeaderLevel - headerLevel;
+                //             while (diff > 0) {
+                //                 currentList = currentList.parentElement!.parentElement as HTMLElement;
+                //                 diff--;
+                //             }
+                //             currentList.appendChild(listItem);
+                //         }
+                //         lastListItem = listItem;
+                //         header.id = uniqueId;
+                //     });
+                // }
+                function createTableOfContents() {
+                    const content = wikiElements.content;
+                    const toc = wikiElements.tableOfContents;
+                    const headers = content.querySelectorAll('h1, h2, h3, h4, h5, h6');
+                    const existingIds = new Set();
+                    let currentList = toc;
+                    let currentHeaderLevel = 1;
+                    let lastListItem = null;
+                    headers.forEach((header, index) => {
+                        const id = toValidId(header.textContent);
+                        const uniqueId = getUniqueId(id, existingIds);
+                        existingIds.add(uniqueId);
+                        const link = document.createElement('a');
+                        link.href = `#${uniqueId}`;
+                        link.textContent = header.textContent;
+                        const listItem = document.createElement('li');
+                        listItem.appendChild(link);
+                        const headerLevel = parseInt(header.tagName.substring(1));
+                        if (headerLevel === currentHeaderLevel) {
+                            currentList.appendChild(listItem);
+                        }
+                        else if (headerLevel > currentHeaderLevel) {
+                            const ol = document.createElement('ol');
+                            lastListItem.appendChild(ol);
+                            currentList = ol;
+                            currentList.appendChild(listItem);
+                            currentHeaderLevel = headerLevel;
+                        }
+                        else {
+                            let diff = currentHeaderLevel - headerLevel;
+                            while (diff > 0) {
+                                currentList = currentList.parentElement.parentElement;
+                                diff--;
+                            }
+                            currentList.appendChild(listItem);
+                        }
+                        if (index < headers.length - 1 && parseInt(headers[index + 1].tagName.substring(1)) > headerLevel) {
+                            // Remove the last child (original <li> element) before appending <details>
+                            currentList.removeChild(currentList.lastElementChild);
+                            const details = document.createElement('details');
+                            const summary = document.createElement('summary');
+                            summary.textContent = header.textContent;
+                            details.appendChild(summary);
+                            // Create a new <ol> element for children
+                            const childrenList = document.createElement('ol');
+                            childrenList.style.marginLeft = `${(parseInt(childrenList.style.marginLeft) || 0) + .5}rem`;
+                            details.appendChild(childrenList);
+                            currentList.appendChild(details);
+                            currentList = childrenList; // Set currentList to the children <ol>
+                            currentHeaderLevel++;
+                        }
+                        lastListItem = listItem;
+                        header.id = uniqueId;
+                    });
+                }
+                createTableOfContents();
+                // TODO: End of Optimize
                 // must be last - QAEZZ
                 const script = document.createElement('script');
                 script.type = 'text/javascript';

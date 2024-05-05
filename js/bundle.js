@@ -37,7 +37,8 @@
         return __awaiter(this, void 0, void 0, function* () {
             document.body.innerHTML = "";
             let httpCat = document.createElement('img');
-            httpCat.classList.add('fixed', 'top-1/2', 'left-1/2', 'transform', '-translate-x-1/2', '-translate-y-1/2');
+            httpCat.classList.add('fullscreen-http');
+            // httpCat.setAttribute('style', 'position: absolute; left: 50%; transform: translate(-50%, 50%);');
             httpCat.src = `https://http.cat/${status}.jpg`;
             document.body.appendChild(httpCat);
         });
@@ -45,12 +46,12 @@
     function showFixedHeader(message) {
         return __awaiter(this, void 0, void 0, function* () {
             let header = document.createElement('div');
-            header.classList.add('fixed', 'w-screen', 'h-auto', 'py-5', 'text-xl', 'bg-red-500', 'inset-x-0', 'top-0');
+            header.classList.add('fixed-header');
             let headerMessage = document.createElement('p');
             headerMessage.classList.add('text-white', 'text-center');
             headerMessage.textContent = message;
             let headerClose = document.createElement('i');
-            headerClose.classList.add('bx', 'bx-x', 'bx-fw', 'bx-md', 'absolute', 'text-white', 'inset-y-0', 'right-0', 'top-1/2', 'transform', '-translate-y-1/3', 'hover:cursor-pointer', 'hover:opacity-80');
+            headerClose.classList.add('bx', 'bx-x', 'bx-fw', 'bx-md', 'fixed-header-close');
             headerClose.addEventListener('click', () => {
                 header.remove();
             });
@@ -2884,23 +2885,140 @@ ${body}</tbody>
         }
     }
 
-    function fetchServerIconUrl(invite) {
+    function fetchServerDetails(invite) {
         return __awaiter(this, void 0, void 0, function* () {
-            try {
-                const response = yield fetch(`https://discord.com/api/invites/${invite}`);
-                const inviteData = yield response.json();
-                const servericon = inviteData.guild.icon;
-                const serverid = inviteData.guild.id;
-                const ext = servericon.startsWith('a_') ? 'gif' : 'png';
-                return `https://cdn.discordapp.com/icons/${serverid}/${servericon}.${ext}`;
+            let serverInfo = {
+                "icon": "https://raw.githubusercontent.com/diswiki/resources/main/assets/loading.gif?raw=true",
+                "members": 0,
+                "online": 0
+            };
+            const response = yield fetch(`https://discord.com/api/v9/invites/${invite}?with_counts=true`);
+            if (!response.ok) {
+                yield showFixedHeader("Couldn't fetch member count, online count, nor server icon from Discord.");
+                return serverInfo;
             }
-            catch (error) {
-                console.error('Error fetching invite:', error);
-                return 'not found';
-            }
+            const responseData = yield response.json();
+            const servericon = responseData.guild.icon;
+            const serverid = responseData.guild.id;
+            const ext = servericon.startsWith('a_') ? 'gif' : 'png';
+            serverInfo.icon = `https://cdn.discordapp.com/icons/${serverid}/${servericon}.${ext}`;
+            serverInfo.members = responseData.approximate_member_count;
+            serverInfo.online = responseData.approximate_presence_count;
+            return serverInfo;
         });
     }
 
+    function formatTimestamp(timestamp, format) {
+        const date = new Date(timestamp * 1000); // Convert Unix timestamp to milliseconds
+        const months = ['Jan.', 'Feb.', 'Mar.', 'Apr.', 'May', 'Jun.', 'Jul.', 'Aug.', 'Sep.', 'Oct.', 'Nov.', 'Dec.'];
+        switch (format) {
+            case 'normal':
+                return `${months[date.getMonth()]} ${date.getDate()}, ${date.getFullYear()}`;
+            case 'normaltime':
+                const hours = date.getHours() % 12 || 12;
+                const minutes = (date.getMinutes() < 10 ? '0' : '') + date.getMinutes();
+                const period = date.getHours() >= 12 ? 'PM' : 'AM';
+                return `${months[date.getMonth()]} ${date.getDate()}, ${date.getFullYear()} ${hours}:${minutes} ${period}`;
+            case 'relative':
+                const now = new Date();
+                const diff = now.getTime() - date.getTime();
+                const seconds = Math.floor(diff / 1000);
+                const minutesDiff = Math.floor(seconds / 60);
+                const hoursDiff = Math.floor(minutesDiff / 60);
+                const daysDiff = Math.floor(hoursDiff / 24);
+                if (daysDiff > 0) {
+                    return `${daysDiff} day${daysDiff > 1 ? 's' : ''} ago`;
+                }
+                else if (hoursDiff > 0) {
+                    return `${hoursDiff} hour${hoursDiff > 1 ? 's' : ''} ago`;
+                }
+                else if (minutesDiff > 0) {
+                    return `${minutesDiff} minute${minutesDiff > 1 ? 's' : ''} ago`;
+                }
+                else {
+                    return `${seconds} second${seconds !== 1 ? 's' : ''} ago`;
+                }
+            default:
+                throw new Error('Invalid format type');
+        }
+    }
+    /**
+     *
+     * @param timestamp
+     * @returns [days, months, years]
+     */
+    function timeSinceTimestamp(timestamp) {
+        const now = new Date();
+        const then = new Date(timestamp * 1000);
+        const diffTime = Math.abs(now.getTime() - then.getTime());
+        // days
+        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+        // months
+        let diffMonths = (now.getFullYear() - then.getFullYear()) * 12;
+        diffMonths += now.getMonth() - then.getMonth();
+        if (now.getDate() < then.getDate()) {
+            diffMonths--;
+        }
+        // years
+        const diffYears = Math.ceil(diffMonths / 12);
+        return [diffDays, diffMonths, diffYears];
+    }
+
+    function truncate(str, n) {
+        return (str.length > n) ? str.slice(0, n - 1) + '...' : str;
+    }
+    class WikiImage extends HTMLElement {
+        constructor() {
+            super();
+        }
+        connectedCallback() {
+            const placement = this.getAttribute('placement') || 'left';
+            let size = this.getAttribute('size') || 150;
+            const file = this.getAttribute('file') || '';
+            const caption = this.textContent || '';
+            this.textContent = '';
+            if (!['left', 'right', 'break'].includes(placement)) {
+                throw new Error('Invalid placement. Only "left", "right", and "break" are allowed.');
+            }
+            size = parseInt(size);
+            if (isNaN(size) || !isFinite(size)) {
+                size = 150;
+            }
+            const pathnameParts = window.location.pathname.toLowerCase().split('/').slice(1);
+            const imageUrl = `https://raw.githubusercontent.com/diswiki/database/main/${pathnameParts[0]}s/${pathnameParts[1]}/assets/${file}`;
+            const img = document.createElement('img');
+            img.src = imageUrl;
+            img.alt = caption;
+            img.width = size;
+            img.style.borderRadius = '5px';
+            const div = document.createElement('div');
+            div.style.display = 'flex';
+            div.style.flexDirection = 'column';
+            div.style.padding = '5px';
+            const p = document.createElement('p');
+            p.textContent = caption;
+            p.style.textAlign = 'center';
+            p.style.fontSize = '.8rem';
+            div.appendChild(img);
+            div.appendChild(p);
+            this.appendChild(div);
+            if (placement === 'break') {
+                div.style.alignItems = 'center';
+            }
+            else if (placement === 'right') {
+                div.style.width = 'min-content';
+                this.style.display = 'inline-block';
+                this.style.width = 'min-content';
+                this.style.float = 'right';
+            }
+            else {
+                div.style.width = 'min-content';
+                this.style.display = 'inline-block';
+                this.style.width = 'min-content';
+                this.style.float = 'left';
+            }
+        }
+    }
     class WikiController {
         start(pathnameParts) {
             return __awaiter(this, void 0, void 0, function* () {
@@ -2937,9 +3055,6 @@ ${body}</tbody>
                     yield showError(404);
                     return;
                 }
-                // console.log(informationData);
-                // console.log(sidebarData);
-                // console.log(contentData);
                 try {
                     const templateReponse = yield fetch("https://raw.githubusercontent.com/diswiki/resources/main/templates/wiki.html");
                     if (!templateReponse.ok) {
@@ -2957,45 +3072,150 @@ ${body}</tbody>
                     yield showError(500);
                     return;
                 }
-                if (pathnameParts[0] === "server") {
-                    this.displayServerPage([informationData, sidebarData, contentData], template);
-                }
-                else if (pathnameParts[0] === "user") {
-                    this.displayUserPage([informationData, sidebarData, contentData], template);
-                }
-                else {
-                    yield showError(500);
-                }
+                this.displayWikiPage([informationData, sidebarData, contentData], pathnameParts[0], pathnameParts[1], template);
             });
         }
-        displayServerPage(pageData, template) {
+        displayWikiPage(pageData, pageType, id, template) {
             return __awaiter(this, void 0, void 0, function* () {
                 const [informationData, sidebarData, contentData] = pageData;
+                console.log(informationData);
                 const contentDiv = document.getElementById("content");
                 if (contentDiv == null) {
                     console.error("Content div does not exist. Nowhere to place content.");
                     yield showError(500);
                     return;
                 }
+                customElements.define('wiki-image', WikiImage);
                 contentDiv.innerHTML = template.trim();
-                const wikiHeader = document.getElementById("wiki-header");
-                const wikiToc = document.getElementById("wiki-toc");
-                const wikiContent = document.getElementById("wiki-content");
-                const wikiSidebar = document.getElementById("wiki-sidebar");
-                const wikiSidebarTitle = document.getElementById("wiki-sidebar-title");
-                const wikiSidebarServerIcon = document.getElementById("wiki-sidebar-server-icon");
-                if ([wikiHeader, wikiToc, wikiContent, wikiSidebar, wikiSidebarTitle, wikiSidebarServerIcon].includes(null)) {
+                const wikiElements = {
+                    tableOfContents: document.getElementById("wiki-toc"),
+                    pageTitle: document.getElementById("wiki-page-title"),
+                    lastEdited: document.getElementById("wiki-last-edited"),
+                    readTime: document.getElementById("wiki-read-time"),
+                    likeCount: document.getElementById("wiki-like-count"),
+                    shareCount: document.getElementById("wiki-share-count"),
+                    content: document.getElementById("wiki-content"),
+                    serverIcon: document.getElementById("wiki-sidebar-server-icon"),
+                    memberCount: document.getElementById("wiki-sidebar-members"),
+                    membersOnline: document.getElementById("wiki-sidebar-online"),
+                    serverCreation: document.getElementById("wiki-sidebar-server-creation"),
+                    serverAge: document.getElementById("wiki-sidebar-server-age"),
+                    serverID: document.getElementById("wiki-sidebar-server-id"),
+                    serverOwner: document.getElementById("wiki-sidebar-server-owner"),
+                    wikiOwner: document.getElementById("wiki-sidebar-wiki-owner"),
+                    wikiAdminsRow: document.getElementById("wiki-sidebar-wiki-admins-row"),
+                    wikiCreation: document.getElementById("wiki-sidebar-wiki-creation"),
+                    actionLike: document.getElementById("wiki-action-like"),
+                    actionShare: document.getElementById("wiki-action-share"),
+                    actionReport: document.getElementById("wiki-action-report"),
+                    joinButton: document.getElementById("wiki-join"),
+                };
+                if (!Object.keys(wikiElements).every((key) => !!wikiElements[key])) {
                     console.error("A piece of the wiki is missing.");
                     yield showFixedHeader("A piece of the wiki is missing, the wiki may not look complete.");
-                    return;
                 }
-                wikiContent.innerHTML = purify.sanitize(Marked.parse(contentData));
-                wikiHeader.textContent = informationData.name;
-                wikiSidebarTitle.textContent = informationData.name;
-                const url = `https://discord.com/invite/${informationData.invite}`;
-                const invite = url.substring(url.lastIndexOf('/') + 1);
-                const serverIconUrl = yield fetchServerIconUrl(invite);
-                wikiSidebarServerIcon === null || wikiSidebarServerIcon === void 0 ? void 0 : wikiSidebarServerIcon.setAttribute("src", serverIconUrl);
+                const avgReadTime = (text) => {
+                    const wpm = 225;
+                    const words = text.trim().split(/\s+/).length;
+                    const time = Math.ceil(words / wpm);
+                    return time;
+                };
+                const allowedTags = [
+                    "wiki-user",
+                    "wiki-channel",
+                    "wiki-image",
+                    "pre",
+                    "code",
+                    "h1",
+                    "h2",
+                    "h3",
+                    "h4",
+                    "h5",
+                    "h6",
+                    "br",
+                    "p",
+                    "a",
+                    "table",
+                    "tr",
+                    "th",
+                    "td",
+                    "img",
+                    "i",
+                    "strong",
+                    "u"
+                ];
+                const allowedAttr = [
+                    "file",
+                    "placement",
+                    "caption",
+                    "size"
+                ];
+                const serverInfo = yield fetchServerDetails(informationData.invite);
+                wikiElements.pageTitle.textContent = informationData.name;
+                wikiElements.likeCount.textContent = `${informationData.likes} ${informationData.likes === 1 ? 'like' : 'likes'}`;
+                wikiElements.shareCount.textContent = `${informationData.shares} ${informationData.shares === 1 ? 'share' : 'shares'}`;
+                wikiElements.readTime.textContent = `${avgReadTime(contentData)} minute read`;
+                let leTime = formatTimestamp(informationData.last_updated, "relative");
+                wikiElements.lastEdited.textContent = `Last Edited: ${leTime}`;
+                wikiElements.lastEdited.setAttribute('data-tooltip', formatTimestamp(informationData.last_updated, "normaltime"));
+                wikiElements.content.innerHTML = purify.sanitize(Marked.parse(contentData), {
+                    ALLOWED_TAGS: allowedTags,
+                    ADD_ATTR: allowedAttr
+                });
+                wikiElements.serverIcon.setAttribute('src', serverInfo.icon);
+                wikiElements.memberCount.textContent = serverInfo.members.toString();
+                wikiElements.membersOnline.textContent = serverInfo.online.toString();
+                //@ts-ignore
+                wikiElements.serverCreation.textContent = formatTimestamp(informationData.creation.server, "normal");
+                //@ts-ignore
+                const [daysSince, monthsSince, yearsSince] = timeSinceTimestamp(informationData.creation.server);
+                let timeSince = `${daysSince} ${daysSince === 1 ? 'day' : 'days'}`;
+                if (daysSince > 180) {
+                    timeSince = `${monthsSince} ${monthsSince === 1 ? 'month' : 'months'}`;
+                }
+                if (monthsSince >= 12) {
+                    timeSince = `${yearsSince} ${yearsSince === 1 ? 'year' : 'years'}`;
+                }
+                wikiElements.serverAge.textContent = timeSince.toString();
+                wikiElements.serverAge.setAttribute('data-tooltip', `${daysSince} ${daysSince === 1 ? 'day' : 'days'} or ${monthsSince} ${monthsSince === 1 ? 'month' : 'months'} or ${yearsSince} ${yearsSince === 1 ? 'year' : 'years'}`);
+                //@ts-ignore
+                wikiElements.serverID.textContent = truncate(informationData.server.toString(), 10);
+                wikiElements.serverID.setAttribute('data-tooltip', informationData.server);
+                const serverOwnerUser = document.createElement('wiki-user');
+                const serverOwnerUserAnchor = document.createElement('a');
+                //@ts-ignore
+                const servOwnerId = informationData.auth.server_owner.toString();
+                serverOwnerUserAnchor.textContent = truncate(servOwnerId, 10);
+                serverOwnerUserAnchor.target = '_blank';
+                //@ts-ignore
+                serverOwnerUserAnchor.href = `/user/${informationData.auth.server_owner.toString()}`;
+                //@ts-ignore
+                alert(informationData.auth.server_owner.toString());
+                serverOwnerUser.appendChild(serverOwnerUserAnchor);
+                const serverOwnerParent = wikiElements.serverOwner.parentElement;
+                serverOwnerParent.removeChild(wikiElements.serverOwner);
+                serverOwnerParent.appendChild(serverOwnerUser);
+                serverOwnerParent.id = "wiki-sidebar-server-owner";
+                serverOwnerParent.setAttribute('data-tooltip', servOwnerId);
+                const wikiOwnerUser = document.createElement('wiki-user');
+                const wikiOwnerUserAnchor = document.createElement('a');
+                //@ts-ignore
+                const wikiOwnerId = informationData.auth.wiki_owner.toString();
+                wikiOwnerUserAnchor.textContent = truncate(wikiOwnerId, 10);
+                wikiOwnerUserAnchor.target = '_blank';
+                //@ts-ignore
+                wikiOwnerUserAnchor.href = `/user/${informationData.auth.wiki_owner}`;
+                wikiOwnerUser.appendChild(wikiOwnerUserAnchor);
+                const wikiOwnerParent = wikiElements.wikiOwner.parentElement;
+                wikiOwnerParent.removeChild(wikiElements.wikiOwner);
+                wikiOwnerParent.appendChild(wikiOwnerUser);
+                wikiOwnerParent.id = "wiki-sidebar-wiki-owner";
+                wikiOwnerParent.setAttribute('data-tooltip', wikiOwnerId);
+                // must be last - QAEZZ
+                const script = document.createElement('script');
+                script.type = 'text/javascript';
+                script.src = '/js/wiki/tooltips.js';
+                document.body.appendChild(script);
             });
         }
         displayUserPage(pageData, template) {

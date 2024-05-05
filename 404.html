@@ -1,21 +1,125 @@
 <!DOCTYPE html>
 <html>
+
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>DisWiki - Mockup</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="/css/base.css">
+    <link rel="stylesheet" href="/css/button.css">
+    <link rel="stylesheet" href="/css/nav.css">
+    <link rel="stylesheet" href="/css/footer.css">
+    <link rel="stylesheet" href="/css/errors.css">
+    <link rel="stylesheet" href="/css/wikicontent.css">
+    <link href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://unpkg.com/tippy.js@6/animations/scale.css"/>
+</head>
+
+<body>
+    <!--[if lt IE 7]>
+            <p class="browsehappy">You are using an <strong>outdated</strong> browser. Please <a href="#">upgrade your browser</a> to improve your experience.</p>
+        <![endif]-->
+    <nav>
+        <div id="nav-container">
+
+            <div class="portion">
+                <span>
+                    <i class="button b-square b-grey bx bx-menu bx-md"></i>
+                    <a href="#" id="donate-button" class="button b-green">Donate</a>
+                    <div class="searchbar">
+                        <span>
+                            <i id="js-search-chevron" class="bx bx-chevron-right"></i>
+                            <select name="dropdown" id="js-search-dropdown">
+                                <option value="server">Server</option>
+                                <option value="user">User</option>
+                            </select>
+                            <input type="text" name="search" id="js-search-input" placeholder="Search for servers...">
+                        </span>
+                        <span>
+                            <i class="button b-square b-blurple bx bxs-send"></i>
+                        </span>
+                    </div>
+                </span>
+            </div>
+            <div class="portion">
+                <span>
+                    <h1 style="color:white;font-family: 'Passion One', sans-serif;
+                    font-weight: 500;
+                    font-style: normal;
+                    font-size: 3.5rem;">DisWiki</h1>
+                </span>
+            </div>
+            <div class="portion">
+                <span>
+                    <a href="#" class="button b-blurple">Sign in</a>
+                </span>
+            </div>
+        </div>
+    </nav>
+
+    <div id="content" style="display: flex; flex-direction: column; align-items: center; width: 100vw;">
+        <!-- Template Here -->
+    </div>
+
+    <footer>
+        <div id="footer-container">
+            <hr />
+            <div id="footer-wrapper">
+                <span>
+                    <img src="https://github.com/diswiki/resources/blob/main/logos/logo-1024.png?raw=true"
+                        alt="DisWiki Logo" width="100px" />
+                    <h2>DisWiki</h2>
+                </span>
+                <span>
+                    <div>
+                        <a href="#" target="_blank" rel="noopener noreferrer">Donate</a>
+                        <a href="#" target="_blank" rel="noopener noreferrer">Discord Server</a>
+                        <a href="#" target="_blank" rel="noopener noreferrer">GH Organization</a>
+                    </div>
+                    <div>
+                        <a href="#" target="_blank" rel="noopener noreferrer">License</a>
+                        <a href="#" target="_blank" rel="noopener noreferrer">Privacy Policy</a>
+                        <a href="#" target="_blank" rel="noopener noreferrer">Terms of Service</a>
+                    </div>
+                    <div>
+                        <a href="#" target="_blank" rel="noopener noreferrer">Report a Wiki Page</a>
+                        <a href="#" target="_blank" rel="noopener noreferrer">PII Takedown Request</a>
+                        <a href="#" target="_blank" rel="noopener noreferrer">Contact Us</a>
+                    </div>
+                </span>
+
+            </div>
+        </div>
+    </footer>
+
+    <script src="https://unpkg.com/@popperjs/core@2"></script>
+    <script src="https://unpkg.com/tippy.js@6"></script>
+    <script type="text/javascript" src="/js/header.js"></script>
+    <script type="text/javascript" src="/js/bundle.js"></script>
+</body>
+
+</html>
+
+
+<!-- <!DOCTYPE html>
+<html>
     <head>
         <meta charset="utf-8">
         <meta http-equiv="X-UA-Compatible" content="IE=edge">
         <title>DisWiki TESTING</title>
         <meta name="description" content="Test application of DisWiki.">
         <meta name="viewport" content="width=device-width, initial-scale=1">
-        <script src="https://cdn.tailwindcss.com"></script>
+        <script src="https://cdn.tailwindcss.com"></>
         <link href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet">
     </head>
     <body style="background-color: #202020; color: white;">
-        <!--[if lt IE 7]>
+        [if lt IE 7]>
             <p class="browsehappy">You are using an <strong>outdated</strong> browser. Please <a href="#">upgrade your browser</a> to improve your experience.</p>
-        <![endif]-->
+        <![endif]
         <h1>Test application. Still in development.</h1>
         <hr/>
         <div id="content"></div>
         <script type="text/javascript" src="/js/bundle.js" async defer></script>
     </body>
-</html>
+</html> -->

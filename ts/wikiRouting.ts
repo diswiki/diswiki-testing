@@ -1,10 +1,7 @@
 import { showError } from "./helpers/errors";
 import { WikiController } from "./routes/wiki";
 import { RootController } from "./routes/root";
-
-interface RouteControllerTemplate {
-    start(pathnameParts: string[]): Promise<void>;
-}
+import { RouteControllerTemplate } from "./helpers/interfaces";
 
 class Routes {
     async root(pathnameParts: string[]): Promise<void> {

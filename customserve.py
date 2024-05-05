@@ -1,7 +1,7 @@
 from http.server import SimpleHTTPRequestHandler, HTTPServer
 import os
 
-PORT = 3000
+PORT = 3001
 NOT_FOUND_PAGE = '404.html'
 
 class CustomHandler(SimpleHTTPRequestHandler):

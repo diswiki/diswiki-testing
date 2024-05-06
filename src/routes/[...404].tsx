@@ -6,14 +6,14 @@ export default function NotFound() {
     <main>
       <Title>Not Found</Title>
       <HttpStatusCode code={404} />
-      <h1>Page Not Found</h1>
-      <p>
-        Visit{" "}
-        <a href="https://start.solidjs.com" target="_blank">
-          start.solidjs.com
-        </a>{" "}
-        to learn how to build SolidStart apps.
-      </p>
+      <img src="https://http.cat/404.jpg"
+        style={{
+          position: 'fixed',
+          top: '50%',
+          left: '50%',
+          transform: 'translate(-50%, -50%)',
+        }}
+        alt="404" />
     </main>
   );
 }

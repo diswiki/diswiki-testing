@@ -1,19 +1,15 @@
 import { Title } from "@solidjs/meta";
-import Counter from "~/components/Counter";
 
 export default function Home() {
   return (
     <main>
-      <Title>Hello World</Title>
-      <h1>Hello world!</h1>
-      <Counter />
-      <p>
-        Visit{" "}
-        <a href="https://start.solidjs.com" target="_blank">
-          start.solidjs.com
-        </a>{" "}
-        to learn how to build SolidStart apps.
-      </p>
+      <Title>DisWiki</Title>
+      <h1 style={{
+        position: 'fixed',
+        top: '50%',
+        left: '50%',
+        transform: 'translate(-50%, -50%)',
+      }}>Coming Soon...</h1>
     </main>
   );
 }

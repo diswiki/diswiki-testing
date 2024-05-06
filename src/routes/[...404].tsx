@@ -4,7 +4,7 @@ import { HttpStatusCode } from "@solidjs/start";
 export default function NotFound() {
   return (
     <main>
-      <Title>Not Found</Title>
+      {/* <Title>Not Found</Title> */}
       <HttpStatusCode code={404} />
       <img src="https://http.cat/404.jpg"
         style={{

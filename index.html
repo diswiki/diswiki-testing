@@ -26,53 +26,38 @@
   <style>
     html,
     body {
-      background-color: rgb(10, 10, 15);
-      color: rgb(220, 220, 225);
+      background-color: #313338;
+      color: whitesmoke;
       font-family: "Roboto", sans-serif;
-    }
-
-    @keyframes spin {
-      0% {
-        transform: translate(-50%, -50%) rotate(0deg);
-      }
-
-      100% {
-        transform: translate(-50%, -50%) rotate(360deg);
-      }
-    }
-
-    .blob {
-      z-index: 0;
-      position: fixed;
-      top: 50%;
-      left: 50%;
-      height: 80vh;
-      width: 20vw;
-      border-radius: 100% 40% 100% 40%;
-      background: linear-gradient(rgb(12, 175, 240), rgb(139, 21, 250));
-      transform: translate(-50%, -50%);
-      animation: spin 20s linear infinite;
-    }
-
-    .blur {
-      z-index: 4;
-      height: 100%;
-      width: 100%;
-      position: fixed;
-      backdrop-filter: blur(200px);
     }
 
     .centered-message {
       z-index: 100;
+      background-color: #2b2d31;
       position: fixed;
+      display: flex;
+      flex-direction: column;
       top: 50%;
       left: 50%;
-      text-align: center;
-      border-radius: 10px;
-      border: 1px solid rgb(180, 180, 185);
+      text-align: left;
+      border-radius: 0 4px 4px 0;
       padding: 10px 25px;
       transition: all 0.5s ease;
       transform: translate(-50%, -50%);
+    }
+    .centered-message p {
+      margin: 0;
+      padding: 0;
+    }
+    .centered-message::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      border-radius: 5px 0 0 5px;
+      background-color: #5a62ee;
+      width: 5px;
+      height: 100%;
     }
 
     .centered-message:hover {
@@ -80,20 +65,18 @@
       transform: translate(-12px, -12px) translate(-50%, -50%);
     }
 
-    #currentPageName {
-      padding: 2px 5px;
-      background-color: rgba(0, 0, 0, 0.4);
-      border-radius: 5px;
-      border: 1px solid white;
+    pre {
+      height: min-content;
+      margin-bottom: 0;
+      padding-bottom: 0;
     }
 
     code {
       display: block;
       white-space: pre-wrap;
-      padding: 2px 15px;
+      padding: 0;
       color: rgb(220, 220, 225);
-      border-radius: 5px;
-      border: 1px solid white;
+      border-radius: 3px;
       text-align: left;
     }
 
@@ -102,16 +85,16 @@
     }
 
     .hljs {
-      background-color: rgba(0, 0, 0, 0.4);
+      background-color: #1e1f22;
     }
   </style>
 
   <div class="blob"></div>
   <div class="blur"></div>
   <div class="centered-message">
-    <p><strong>DisWiki</strong> is currently still in development.</p>
-    <p>You are on the page: <strong id="currentPageName"></strong></p>
-    <p id="code-sample-language"></p>
+    <strong style="font-size: 1.1rem; margin-bottom: 10px; margin-top: 5px;">Coming Soon!</strong>
+    <p style="font-size: .9rem; opacity: .9; font-weight: lighter;"><strong>DisWiki</strong> is currently still in development.</p>
+    <p style="font-size: .9rem; opacity: .9; font-weight: lighter;" id="code-sample-language"></p>
     <pre>
 <code id="code-sample"></code>
             </pre>

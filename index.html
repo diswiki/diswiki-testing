@@ -1,22 +1,273 @@
 <!DOCTYPE html>
 <html>
-    <head>
-        <meta charset="utf-8">
-        <meta http-equiv="X-UA-Compatible" content="IE=edge">
-        <title>DisWiki TESTING</title>
-        <meta name="description" content="Test application of DisWiki.">
-        <meta name="viewport" content="width=device-width, initial-scale=1">
-        <script src="https://cdn.tailwindcss.com"></script>
-        <link href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet">
-    </head>
-    <body style="background-color: #202020; color: white;">
-        <!--[if lt IE 7]>
+
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <title>DisWiki</title>
+  <meta name="twitter:card" content="summary_image" />
+  <meta name="twitter:image" content="https://github.com/organizations/diswiki/settings/profile" />
+  <meta name="twitter:image:src" content="https://github.com/organizations/diswiki/settings/profile" />
+  <meta property="og:title" content="DisWiki" />
+  <meta property="og:description"
+    content="The wiki platform for Discord servers and users! DisWiki is currently still in development." />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="theme-color" content="#5a62ee" />
+
+  <link rel="stylesheet"
+    href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/11.3.1/styles/atom-one-dark-reasonable.min.css" />
+</head>
+
+<body>
+  <!--[if lt IE 7]>
             <p class="browsehappy">You are using an <strong>outdated</strong> browser. Please <a href="#">upgrade your browser</a> to improve your experience.</p>
         <![endif]-->
-        <h1>Test application of DisWiki. DisWiki is still in development.</h1>
-        <hr/>
-        <p>index</p>
-        <!-- <script>var exports = {};</script> -->
-        <script type="text/javascript" src="/js/bundle.js" async defer></script>
-    </body>
+
+  <style>
+    html,
+    body {
+      background-color: rgb(10, 10, 15);
+      color: rgb(220, 220, 225);
+      font-family: "Roboto", sans-serif;
+    }
+
+    @keyframes spin {
+      0% {
+        transform: translate(-50%, -50%) rotate(0deg);
+      }
+
+      100% {
+        transform: translate(-50%, -50%) rotate(360deg);
+      }
+    }
+
+    .blob {
+      z-index: 0;
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      height: 80vh;
+      width: 20vw;
+      border-radius: 100% 40% 100% 40%;
+      background: linear-gradient(rgb(12, 175, 240), rgb(139, 21, 250));
+      transform: translate(-50%, -50%);
+      animation: spin 20s linear infinite;
+    }
+
+    .blur {
+      z-index: 4;
+      height: 100%;
+      width: 100%;
+      position: fixed;
+      backdrop-filter: blur(200px);
+    }
+
+    .centered-message {
+      z-index: 100;
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      text-align: center;
+      border-radius: 10px;
+      border: 1px solid rgb(180, 180, 185);
+      padding: 10px 25px;
+      transition: all 0.5s ease;
+      transform: translate(-50%, -50%);
+    }
+
+    .centered-message:hover {
+      box-shadow: 8px 10px 2px 2px rgba(0, 0, 0, 0.4);
+      transform: translate(-12px, -12px) translate(-50%, -50%);
+    }
+
+    #currentPageName {
+      padding: 2px 5px;
+      background-color: rgba(0, 0, 0, 0.4);
+      border-radius: 5px;
+      border: 1px solid white;
+    }
+
+    code {
+      display: block;
+      white-space: pre-wrap;
+      padding: 2px 15px;
+      color: rgb(220, 220, 225);
+      border-radius: 5px;
+      border: 1px solid white;
+      text-align: left;
+    }
+
+    strong {
+      font-weight: bold;
+    }
+
+    .hljs {
+      background-color: rgba(0, 0, 0, 0.4);
+    }
+  </style>
+
+  <div class="blob"></div>
+  <div class="blur"></div>
+  <div class="centered-message">
+    <p><strong>DisWiki</strong> is currently still in development.</p>
+    <p>You are on the page: <strong id="currentPageName"></strong></p>
+    <p id="code-sample-language"></p>
+    <pre>
+<code id="code-sample"></code>
+            </pre>
+  </div>
+
+  <script>
+    window.addEventListener('DOMContentLoaded', (event) => {
+      var currentPageUri = new URL(window.location.href);
+
+      var currentPageName = "";
+      if (currentPageUri.pathname.length > 0) {
+        currentPageName = currentPageUri.pathname;
+      }
+
+      document.getElementById('currentPageName').innerText = currentPageName;
+    });
+  </script>
+  <script>
+    function getRandomCodeSample() {
+      const codeSamples = [
+        {
+          language: 'JavaScript',
+          code: `
+function greet(name) {
+    console.log('Hello, ' + name + '!');
+}
+
+greet('World');
+            `
+        },
+        {
+          language: 'Python',
+          code: `
+def greet(name):
+    print(f'Hello, {name}!')
+
+greet('World')
+            `
+        },
+        {
+          language: 'Java 🤮',
+          code: `
+public class HelloWorld {
+    public static void main(String[] args) {
+        System.out.println("Hello, World!");
+    }
+}
+            `
+        },
+        {
+          language: "C Sharp",
+          code: `
+using System;
+
+public class Program
+{
+    public static void Main(string[] args)
+    {
+        Console.WriteLine("Hello, World!");
+    }
+}
+            `
+        }
+      ];
+
+      const randomIndex = Math.floor(Math.random() * codeSamples.length);
+      return codeSamples[randomIndex];
+    }
+
+    var randomCodeSample = getRandomCodeSample();
+    document.getElementById("code-sample-language").innerText = `In the meantime, enjoy some ${randomCodeSample.language}!`;
+    document.getElementById("code-sample").innerHTML = randomCodeSample.code;
+  </script>
+  <script>
+    console.log("%cSPA%c🔄 %cStarted...", "background-color: orange; color: white; padding: 1px 5px; border-radius: 3px; font-weight: bold", "", "font-weight: bold");
+
+    async function loadScript(scriptUrl) {
+      console.log(`%cSPA%c🔄 %cLoading:%c ${new URL(scriptUrl).host}`, "background-color: orange; color: white; padding: 1px 5px; border-radius: 3px; font-weight: bold", "", "font-weight: bold", "font-style: italic;");
+      await new Promise((resolve, reject) => {
+        const script = document.createElement('script');
+        script.src = scriptUrl;
+        script.onload = resolve;
+        script.onerror = reject;
+        document.head.appendChild(script);
+      });
+      console.log(`%cSPA%c✅ %c Loaded:%c ${new URL(scriptUrl).host}`, "background-color: green; color: white; padding: 1px 5px; border-radius: 3px; font-weight: bold", "", "font-weight: bold", "font-style: italic;");
+    }
+
+    async function loadScripts(scripts) {
+      for (const script of scripts) {
+        await loadScript(script);
+      }
+    }
+
+    async function main() {
+      // Create and show the loading overlay
+      const loadingOverlay = document.createElement('div');
+      loadingOverlay.id = 'loading-overlay';
+      loadingOverlay.innerHTML = `
+    <style>
+      #loading-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgb(10, 10, 15);
+        z-index: 9999;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+      
+      .spinner {
+        border: 10px solid #3c3b41;
+        border-bottom: 10px solid #646eff;
+        border-radius: 50%;
+        filter: blur(1px);
+        width: 120px;
+        height: 120px;
+        animation: spin 1s cubic-bezier(0.68, -0.55, 0.265, 1.55) infinite;
+      }
+
+      @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+      }
+    </style>
+    <div class="spinner"></div>
+  `;
+      document.body.append(loadingOverlay);
+
+      // Load scripts and parse markdown content
+      const scripts = [
+        "https://cdnjs.cloudflare.com/ajax/libs/showdown/1.9.1/showdown.min.js",
+        "https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.2.0/highlight.min.js"
+      ];
+
+      await loadScripts(scripts);
+      const markdownBlocks = document.querySelectorAll('pre.markdown');
+      const converter = new showdown.Converter();
+      markdownBlocks.forEach((block) => {
+        block.innerHTML = converter.makeHtml(block.textContent);
+      });
+      hljs.highlightAll();
+
+      // Hide and remove the loading overlay
+      await new Promise(resolve => setTimeout(resolve, 250));
+      loadingOverlay.style.display = 'none';
+      loadingOverlay.remove();
+
+      console.log("%cSPA%c✅ %cAll done!", "background-color: green; color: white; padding: 1px 5px; border-radius: 3px; font-weight: bold", "", "font-weight: bold");
+    }
+
+    main();
+  </script>
+</body>
+
 </html>

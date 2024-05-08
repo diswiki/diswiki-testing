@@ -1,0 +1,44 @@
+.button {
+    min-height: 40px;
+    max-height: 40px;
+    display: -webkit-box;
+    display: -ms-flexbox;
+    display: flex;
+    -webkit-box-align: center;
+        -ms-flex-align: center;
+            align-items: center;
+    -webkit-box-pack: center;
+        -ms-flex-pack: center;
+            justify-content: center;
+    -webkit-box-sizing: border-box;
+            box-sizing: border-box;
+    background-color: inherit;
+    padding: 0 15px;
+    border-radius: 3px;
+    cursor: pointer;
+    height: -webkit-max-content;
+    height: -moz-max-content;
+    height: max-content;
+    font-size: larger;
+}
+
+.button:hover {
+    -webkit-filter: brightness(115%);
+            filter: brightness(115%);
+}
+
+.button.b-grey { background-color: var(--c-light); }
+.button.b-blurple { background-color: var(--c-blurple); }
+.button.b-green {
+    color: black;
+    background-color: var(--c-green);
+}
+.button.b-red {
+    color: white;
+    background-color: var(--c-red);
+}
+
+.button.b-square {
+    aspect-ratio: 1/1;
+    padding: 2px;
+}

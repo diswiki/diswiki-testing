@@ -1,0 +1,270 @@
+---
+import Layout from "../layouts/Layout.astro";
+---
+
+<Layout title="DisWiki">
+	<main>
+		<div class="blob"></div>
+		<div class="blur"></div>
+		<div class="centered-message">
+			<strong
+				style="font-size: 1.1rem; margin-bottom: 10px; margin-top: 5px;"
+				>Coming Soon!</strong
+			>
+			<p style="font-size: .9rem; opacity: .9; font-weight: lighter;">
+				<strong>DisWiki</strong> is currently still in development.
+			</p>
+			<p
+				style="font-size: .9rem; opacity: .9; font-weight: lighter;"
+				id="code-sample-language"
+			>
+			</p>
+			<pre>
+<code id="code-sample" />
+            </pre>
+		</div>
+	</main>
+</Layout>
+
+<style>
+	html,
+	body {
+		background-color: #313338;
+		color: whitesmoke;
+		font-family: "Roboto", sans-serif;
+	}
+
+	.centered-message {
+		z-index: 100;
+		background-color: #2b2d31;
+		position: fixed;
+		display: flex;
+		flex-direction: column;
+		top: 50%;
+		left: 50%;
+		text-align: left;
+		border-radius: 0 4px 4px 0;
+		padding: 10px 25px;
+		transition: all 0.5s ease;
+		transform: translate(-50%, -50%);
+	}
+	.centered-message p {
+		margin: 0;
+		padding: 0;
+	}
+	.centered-message::before {
+		content: "";
+		position: absolute;
+		top: 0;
+		left: 0;
+		border-radius: 5px 0 0 5px;
+		background-color: #5a62ee;
+		width: 5px;
+		height: 100%;
+	}
+
+	.centered-message:hover {
+		box-shadow: 8px 10px 2px 2px rgba(0, 0, 0, 0.4);
+		transform: translate(-12px, -12px) translate(-50%, -50%);
+	}
+
+	pre {
+		height: min-content;
+		margin-bottom: 0;
+		padding-bottom: 0;
+	}
+
+	code {
+		display: block;
+		white-space: pre-wrap;
+		padding: 0;
+		color: rgb(220, 220, 225);
+		border-radius: 3px;
+		text-align: left;
+	}
+
+	strong {
+		font-weight: bold;
+	}
+
+	.hljs {
+		background-color: #1e1f22;
+	}
+</style>
+
+<script>
+	window.addEventListener("DOMContentLoaded", (event) => {
+		var currentPageUri = new URL(window.location.href);
+
+		var currentPageName = "";
+		if (currentPageUri.pathname.length > 0) {
+			currentPageName = currentPageUri.pathname;
+		}
+
+		document.getElementById("currentPageName")!.innerText = currentPageName;
+	});
+</script>
+<script>
+	function getRandomCodeSample() {
+		const codeSamples = [
+			{
+				language: "JavaScript",
+				code: `
+function greet(name) {
+    console.log('Hello, ' + name + '!');
+}
+
+greet('World');
+            `,
+			},
+			{
+				language: "Python",
+				code: `
+def greet(name):
+    print(f'Hello, {name}!')
+
+greet('World')
+            `,
+			},
+			{
+				language: "Java 🤮",
+				code: `
+public class HelloWorld {
+    public static void main(String[] args) {
+        System.out.println("Hello, World!");
+    }
+}
+            `,
+			},
+			{
+				language: "C Sharp",
+				code: `
+using System;
+
+public class Program
+{
+    public static void Main(string[] args)
+    {
+        Console.WriteLine("Hello, World!");
+    }
+}
+            `,
+			},
+		];
+
+		const randomIndex = Math.floor(Math.random() * codeSamples.length);
+		return codeSamples[randomIndex];
+	}
+
+	var randomCodeSample = getRandomCodeSample();
+	document.getElementById("code-sample-language")!.innerText =
+		`In the meantime, enjoy some ${randomCodeSample.language}!`;
+	document.getElementById("code-sample")!.innerHTML = randomCodeSample.code;
+</script>
+<script>
+	console.log(
+		"%cSPA%c🔄 %cStarted...",
+		"background-color: orange; color: white; padding: 1px 5px; border-radius: 3px; font-weight: bold",
+		"",
+		"font-weight: bold",
+	);
+
+	async function loadScript(scriptUrl: string) {
+		console.log(
+			`%cSPA%c🔄 %cLoading:%c ${new URL(scriptUrl).host}`,
+			"background-color: orange; color: white; padding: 1px 5px; border-radius: 3px; font-weight: bold",
+			"",
+			"font-weight: bold",
+			"font-style: italic;",
+		);
+		await new Promise((resolve, reject) => {
+			const script = document.createElement("script");
+			script.src = scriptUrl;
+			script.onload = resolve;
+			script.onerror = reject;
+			document.head.appendChild(script);
+		});
+		console.log(
+			`%cSPA%c✅ %c Loaded:%c ${new URL(scriptUrl).host}`,
+			"background-color: green; color: white; padding: 1px 5px; border-radius: 3px; font-weight: bold",
+			"",
+			"font-weight: bold",
+			"font-style: italic;",
+		);
+	}
+
+	async function loadScripts(scripts: string[]) {
+		for (const script of scripts) {
+			await loadScript(script);
+		}
+	}
+
+	async function main() {
+		// Create and show the loading overlay
+		const loadingOverlay = document.createElement("div");
+		loadingOverlay.id = "loading-overlay";
+		loadingOverlay.innerHTML = `
+    <style>
+      #loading-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgb(10, 10, 15);
+        z-index: 9999;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+      
+      .spinner {
+        border: 10px solid #3c3b41;
+        border-bottom: 10px solid #646eff;
+        border-radius: 50%;
+        filter: blur(1px);
+        width: 120px;
+        height: 120px;
+        animation: spin 1s cubic-bezier(0.68, -0.55, 0.265, 1.55) infinite;
+      }
+
+      @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+      }
+    </style>
+    <div class="spinner"></div>
+  `;
+		document.body.append(loadingOverlay);
+
+		// Load scripts and parse markdown content
+		const scripts = [
+			"https://cdnjs.cloudflare.com/ajax/libs/showdown/1.9.1/showdown.min.js",
+			"https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.2.0/highlight.min.js",
+		];
+
+		await loadScripts(scripts);
+		const markdownBlocks = document.querySelectorAll("pre.markdown");
+		//@ts-expect-error
+		const converter = new showdown.Converter();
+		markdownBlocks.forEach((block) => {
+			block.innerHTML = converter.makeHtml(block.textContent);
+		});
+		//@ts-expect-error
+		hljs.highlightAll();
+
+		// Hide and remove the loading overlay
+		await new Promise((resolve) => setTimeout(resolve, 250));
+		loadingOverlay.style.display = "none";
+		loadingOverlay.remove();
+
+		console.log(
+			"%cSPA%c✅ %cAll done!",
+			"background-color: green; color: white; padding: 1px 5px; border-radius: 3px; font-weight: bold",
+			"",
+			"font-weight: bold",
+		);
+	}
+
+	main();
+</script>

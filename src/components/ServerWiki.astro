@@ -1,153 +1,189 @@
 ---
 import type { wikiPageData } from "../helpers/types";
-import Layout from "../layouts/Layout.astro";
 
-
-const { results, errors } = Astro.props; // TODO: errors
+const { results, errors } = Astro.props;
 const data: wikiPageData = results;
+
+let errorsHtmlStrings = [];
+if (errors.length > 0) {
+  for (var i = 0; i < errors.length; i++) {
+    let error = errors[i];
+    errorsHtmlStrings.push(
+      `<div style="position: fixed; right: 0; left: 0; top: 0; padding-top: 1.25rem; padding-bottom: 1.25rem; width: 100vw; height: auto; font-size: 1.25rem; line-height: 1.75rem; background-color: var(--c-red);">
+      <p style="color: whitesmoke; text-align: center;">${error}</p>
+      <i class="bx bx-x bx-fw bx-md" style="position: absolute; color: white; padding-top: 0; padding-bottom: 0; right: 0; transform: translateY(-75%); cursor: pointer;"></i>
+    </div>`,
+    );
+  }
+}
 ---
 
-<Layout title="DisWiki">
-  <div id="wiki-container">
-    <div id="wiki-toc-container">
-      <h2>Table of Contents</h2>
-      <hr />
-      <ol id="wiki-toc" set:html={data.tocHtmlString}>
-        <li><a href="#"><strong>To Top</strong></a></li>
-        <!-- Variable things that are added by JavaScript -->
-      </ol>
-    </div>
-    <div id="wiki-wrapper">
-      <h1 id="wiki-page-title">{data.wikiPageTitle}</h1>
-      <hr />
-      <span id="wiki-page-info">
-        <span id="wiki-page-info-container">
-          <p
-            id="wiki-last-edited"
-            class="js-has-tooltip"
-            data-tooltip={data.tooltipLastEditedTimeString}
-          >
-            {data.lastEditedTimeString}
-          </p>
+<div id="errors" set:html={errorsHtmlStrings.slice(0, 3).join('')} />
+
+<div id="wiki-container">
+  <div id="wiki-toc-container">
+    <h2>Table of Contents</h2>
+    <hr />
+    <ol id="wiki-toc" set:html={data.tocHtmlString}>
+      <li><a href="#"><strong>To Top</strong></a></li>
+      <!-- Variable things that are added by JavaScript -->
+    </ol>
+  </div>
+  <div id="wiki-wrapper">
+    <h1 id="wiki-page-title">{data.wikiPageTitle}</h1>
+    <hr />
+    <span id="wiki-page-info">
+      <span id="wiki-page-info-container">
+        <p
+          id="wiki-last-edited"
+          class="js-has-tooltip"
+          data-tooltip={data.tooltipLastEditedTimeString}
+        >
+          {data.lastEditedTimeString}
+        </p>
+        <span>
           <span>
-            <span>
-              <i class="bx bxs-time"></i>
-              <p id="wiki-read-time">{data.readTime} minute read</p>
-            </span>
-            <span>
-              <i class="bx bxs-like"></i>
-              <p id="wiki-like-count">{data.likeCount} likes</p>
-            </span>
-            <span>
-              <i id="wiki-share" class="bx bxs-share"></i>
-              <p id="wiki-share-count">{data.shareCount} shares</p>
-            </span>
+            <i class="bx bxs-time"></i>
+            <p id="wiki-read-time">{data.readTime} minute read</p>
+          </span>
+          <span>
+            <i class="bx bxs-like"></i>
+            <p id="wiki-like-count">{data.likeCount} likes</p>
+          </span>
+          <span>
+            <i id="wiki-share" class="bx bxs-share"></i>
+            <p id="wiki-share-count">{data.shareCount} shares</p>
           </span>
         </span>
       </span>
-      <hr />
-      <div id="wiki-content-wrapper">
-        <div id="wiki-content" set:html={data.content}>
-          <!-- Variable things that are added by JavaScript -->
-        </div>
-        <div id="wiki-sidebar">
-          <img id="wiki-sidebar-server-icon" src={data.serverIconUrl} />
-          <div class="wiki-sidebar-portion">
-            <h4>Server Info</h4>
-            <table>
-              <tr>
-                <th>Members</th>
-                <td id="wiki-sidebar-members">{data.memberCount}</td>
-              </tr>
-              <tr>
-                <th>Currently Online</th>
-                <td id="wiki-sidebar-online">{data.membersOnline}</td>
-              </tr>
-              <tr>
-                <th>Server Creation</th>
-                <td id="wiki-sidebar-server-creation">{data.serverCreation}</td>
-              </tr>
-              <tr>
-                <th>Server Age</th>
-                <td
-                  id="wiki-sidebar-server-age"
+    </span>
+    <hr />
+    <div id="wiki-content-wrapper">
+      <div id="wiki-content" set:html={data.content}>
+        <!-- Variable things that are added by JavaScript -->
+      </div>
+      <div id="wiki-sidebar">
+        <img id="wiki-sidebar-server-icon" src={data.serverIconUrl} />
+        <div class="wiki-sidebar-portion">
+          <h4>Server Info</h4>
+          <table>
+            <tr>
+              <th>Members</th>
+              <td id="wiki-sidebar-members">{data.memberCount}</td>
+            </tr>
+            <tr>
+              <th>Currently Online</th>
+              <td id="wiki-sidebar-online">{data.membersOnline}</td>
+            </tr>
+            <tr>
+              <th>Server Creation</th>
+              <td id="wiki-sidebar-server-creation">{data.serverCreation}</td>
+            </tr>
+            <tr>
+              <th>Server Age</th>
+              <td
+                id="wiki-sidebar-server-age"
+                class="js-has-tooltip"
+                data-tooltip={data.tooltipServerAge}>{data.serverAge}</td
+              >
+            </tr>
+            <tr>
+              <th>Server ID</th>
+              <td
+                id="wiki-sidebar-server-id"
+                class="js-has-tooltip"
+                data-tooltip={data.tooltipServerID}>{data.serverID}</td
+              >
+            </tr>
+            <tr>
+              <th>Server Owner</th>
+              <td
+                ><wiki-user
+                  id="wiki-sidebar-server-owner"
                   class="js-has-tooltip"
-                  data-tooltip={data.tooltipServerAge}>{data.serverAge}</td
-                >
-              </tr>
-              <tr>
-                <th>Server ID</th>
-                <td id="wiki-sidebar-server-id" class="js-has-tooltip" data-tooltip={data.tooltipServerID}>{data.serverID}</td>
-              </tr>
-              <tr>
-                <th>Server Owner</th>
-                <td
-                  ><wiki-user
-                    id="wiki-sidebar-server-owner"
-                    class="js-has-tooltip"
-                    data-tooltip={data.tooltipServerOwner}
-                    >{data.serverOwner}</wiki-user
-                  ></td
-                >
-              </tr>
-            </table>
-          </div>
-          <div class="wiki-sidebar-portion">
-            <h4>Wiki Info</h4>
-            <table>
-              <tr>
-                <th>Wiki Owner</th>
-                <td
-                  ><wiki-user
-                    id="wiki-sidebar-wiki-owner"
-                    class="js-has-tooltip"
-                    data-tooltip={data.tooltipWikiOwner}
-                    >{data.wikiOwner}</wiki-user
-                  ></td
-                >
-              </tr>
-              <tr id="wiki-sidebar-wiki-admins-row">
-                <th>Wiki Admins</th>
-                <td set:html={data.wikiAdminsHtmlString} />
-              </tr>
-              <tr>
-                <th>Wiki Creation</th>
-                <td id="wiki-sidebar-wiki-creation">{data.wikiCreation}</td>
-              </tr>
-            </table>
-          </div>
-          <span
-            style="display: inline-flex; gap: 5px; margin-top: 10px; margin-bottom: 5px; width: 100%;"
-          >
-            <i
-              id="wiki-action-like"
-              class="button b-grey bx bxs-like bx-md"
-              style="flex-grow: 1; text-align: center;"></i>
-            <i
-              id="wiki-action-share"
-              class="button b-grey bx bxs-share-alt bx-md"
-              style="flex-grow: 1; text-align: center;"></i>
-            <i
-              id="wiki-action-report"
-              class="button b-grey bx bxs-error bx-md"
-              style="flex-grow: 1; text-align: center;"></i>
-          </span>
-          <a
-            id="wiki-join"
-            href={data.joinLink}
-            class="button b-blurple"
-            target="_blank">Join</a
-          >
+                  data-tooltip={data.tooltipServerOwner}
+                  >{data.serverOwner}</wiki-user
+                ></td
+              >
+            </tr>
+          </table>
         </div>
+        <div class="wiki-sidebar-portion">
+          <h4>Wiki Info</h4>
+          <table>
+            <tr>
+              <th>Wiki Owner</th>
+              <td
+                ><wiki-user
+                  id="wiki-sidebar-wiki-owner"
+                  class="js-has-tooltip"
+                  data-tooltip={data.tooltipWikiOwner}
+                  >{data.wikiOwner}</wiki-user
+                ></td
+              >
+            </tr>
+            <tr id="wiki-sidebar-wiki-admins-row">
+              <th>Wiki Admins</th>
+              <td set:html={data.wikiAdminsHtmlString} />
+            </tr>
+            <tr>
+              <th>Wiki Creation</th>
+              <td id="wiki-sidebar-wiki-creation">{data.wikiCreation}</td>
+            </tr>
+          </table>
+        </div>
+        <div set:html={data.sidebarHtmlString}></div>
+        <span
+          style="display: inline-flex; gap: 5px; margin-top: 10px; margin-bottom: 5px; width: 100%;"
+        >
+          <i
+            id="wiki-action-like"
+            class="button b-grey bx bxs-like bx-md"
+            style="flex-grow: 1; text-align: center;"></i>
+          <i
+            id="wiki-action-share"
+            class="button b-grey bx bxs-share-alt bx-md"
+            style="flex-grow: 1; text-align: center;"></i>
+          <i
+            id="wiki-action-report"
+            class="button b-grey bx bxs-error bx-md"
+            style="flex-grow: 1; text-align: center;"></i>
+        </span>
+        <a
+          id="wiki-join"
+          href={data.joinLink}
+          class="button b-blurple"
+          target="_blank">Join</a
+        >
       </div>
     </div>
-    <div id="wiki-spacer">
-      <!-- <p>hi mom</p> -->
-    </div>
   </div>
-  <script is:inline src="https://unpkg.com/@popperjs/core@2"></script>
-  <script is:inline src="https://unpkg.com/tippy.js@6"></script>
-</Layout>
+  <div id="wiki-spacer">
+    <!-- <p>hi mom</p> -->
+  </div>
+</div>
+<script is:inline src="https://unpkg.com/@popperjs/core@2"></script>
+<script is:inline src="https://unpkg.com/tippy.js@6"></script>
+<script is:inline src="/js/wikiImage.js"></script>
+
+<script>
+  document.addEventListener("DOMContentLoaded", () => {
+    let errors = document.getElementById("errors");
+    if (errors!.children.length > 0) {
+      for (var i = 0; i < errors!.children.length; i++) {
+        let error = errors!.children[i];
+        error.children[1].addEventListener("click", () => {
+          error.remove();
+          if (errors?.children.length === 0) {
+            errors.remove();
+          }
+        });
+      }
+    } else {
+      errors?.remove();
+    }
+  });
+</script>
 
 <script>
   const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));

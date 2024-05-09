@@ -1,3 +1,5 @@
+import { string } from "astro/zod";
+
 export type ServerInformation = {
     version: number;
     last_updated: number;
@@ -37,14 +39,43 @@ export type UserInformation = {
 };
 
 
+// export type WikiSidebarItem = {
+//     header: string;
+//     markdown_content: string;
+//     images_above_markdown_content: boolean;
+// images: {
+//     name: string;
+//     caption: string;
+// }[];
+// };
+
+/*
+
+{
+      header: "Test Header",
+      fields: [
+        {name: 'Name', value: 'Data'},
+        {name: 'Thing', value: 'Stuff'}
+      ]
+      images_above_content: false,
+      images: [
+        {
+          name: "terry-davis-wobble.gif",
+          caption: "Terry Davis dancing.",
+        },
+      ],
+    },
+*/
+
 export type WikiSidebarItem = {
-    header: string;
-    markdown_content: string;
-    images_above_markdown_content: boolean;
+    header: string,
+    fields: { name: string, value: string }[],
+    images_above_content: boolean,
     images: {
-        name: string;
-        caption: string;
-    }[];
+        name: string,
+        caption: string,
+    }[]
+
 };
 
 export type WikiSidebar = {
@@ -53,6 +84,7 @@ export type WikiSidebar = {
 
 export type wikiPageData = {
     tocHtmlString: string,
+    sidebarHtmlString: string,
     wikiPageTitle: string,
     lastEditedTimeString: string,
     readTime: string,

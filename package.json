@@ -1,12 +1,12 @@
 {
-  "name": "",
+  "name": "diswiki",
   "type": "module",
   "version": "0.0.1",
   "scripts": {
-    "dev": "astro dev",
-    "start": "astro dev",
-    "build": "astro check && astro build",
-    "preview": "astro preview",
+    "dev": "tsc src/client/* --outDir public/js && astro dev",
+    "start": "tsc src/client/* --outDir public/js && astro dev",
+    "build": "tsc src/client/* --outDir public/js && astro check && astro build",
+    "preview": "tsc src/client/* --outDir public/js && astro preview",
     "astro": "astro"
   },
   "dependencies": {

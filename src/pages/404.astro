@@ -1,0 +1,68 @@
+---
+
+---
+
+<script>
+    document.getElementById('uh-oh')?.setAttribute('data-error', `The path '${window.location.pathname}' does not exist.`);
+</script>
+
+<body style="background-color: #36393e;">
+  <div id="uh-oh">
+    <p>Duh oh, something went wrong!</p>
+    <img
+      src="https://http.cat/404.jpg"
+      width="550"
+    />
+  </div>
+</body>
+
+<style>
+  #uh-oh {
+    font-family: Arial;
+    position: fixed;
+    top: 50%;
+    right: 50%;
+    transform: translate(50%, -50%);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding: 15px 30px 30px 30px;
+    background-color: #2b2d31;
+    border-radius: 0 5px 5px 0;
+  }
+
+  #uh-oh::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    border-radius: 5px 0 0 5px;
+    background-color: #5a62ee;
+    width: 5px;
+    height: 100%;
+  }
+
+  #uh-oh > img {
+    border-radius: 7px;
+  }
+  #uh-oh > p {
+    width: 100%;
+    text-align: left;
+    color: whitesmoke;
+    font-weight: bold;
+    margin: 0;
+    padding: 0 0 10px 0;
+    font-size: 1.1rem;
+  }
+
+  #uh-oh::after {
+    content: attr(data-error);
+    color: #aeb0b4;
+    position: absolute;
+    bottom: .75rem;
+    z-index: 1000;
+    left: 2rem;
+    font-size: .8rem;
+  }
+</style>

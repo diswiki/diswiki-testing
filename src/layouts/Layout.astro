@@ -1,5 +1,6 @@
 ---
 import Nav from '../components/Nav.astro';
+import Footer from '../components/Footer.astro';
 
 interface Props {
 	title: string;
@@ -31,6 +32,7 @@ const { title } = Astro.props;
 		/>
 		<meta name="viewport" content="width=device-width, initial-scale=1" />
 		<meta name="theme-color" content="#5a62ee" />
+		<link rel="sitemap" href="/sitemap-index.xml" />
 
 		<link
 			rel="stylesheet"
@@ -50,8 +52,11 @@ const { title } = Astro.props;
 		/>
 	</head>
 	<body>
-		<!-- <Nav /> -->
-		<slot />
+		<Nav />
+		<div id="content" style="display: flex; flex-direction: column; align-items: center; width: 100vw;">
+			<slot/>
+		</div>
+		<Footer />
 	</body>
 </html>
 <style is:global>
@@ -69,6 +74,7 @@ const { title } = Astro.props;
 		--c-dark: #282b30ff;
 		--c-darker: #1e2124ff;
 		--c-lighter: #b5bac1;
+		--c-lighter-dim: #7c8085;
 		--c-light: #424549;
 		--c-green: #57f287ff;
 		--c-blurple: #5865f2ff;

@@ -1,0 +1,186 @@
+---
+import * as db from "../../lib/wikis";
+import ServerWiki from "../../components/ServerWiki.astro";
+import type {
+  wikiPageData,
+  ServerInformation,
+  WikiSidebarItem,
+  WikiSidebar,
+  discordApiServerInfo,
+} from "../../helpers/types";
+import {
+  formatTimestamp,
+  timeSinceTimestamp,
+  avgReadTime,
+} from "../../helpers/time";
+import { createTableOfContents } from "../../helpers/createToc";
+import { truncate } from "../../helpers/text";
+import { fetchServerDetails } from "../../helpers/discord";
+import DOMPurify from "isomorphic-dompurify";
+import { Marked } from "@ts-stack/markdown";
+
+// Find a better way to do this, this is a heavy
+// operation that gets ran every request. Maybe
+// make use of caching or Astro collections.
+export async function getStaticPaths() {
+  return await db.returnStaticPathsID();
+}
+
+const { id } = Astro.params;
+
+const allowedTags = [
+  "wiki-user",
+  "wiki-channel",
+  "wiki-image",
+  "pre",
+  "code",
+  "h1",
+  "h2",
+  "h3",
+  "h4",
+  "h5",
+  "h6",
+  "br",
+  "p",
+  "a",
+  "tbody",
+  "table",
+  "tr",
+  "th",
+  "td",
+  "img",
+  "i",
+  "em",
+  "b",
+  "strong",
+  "u",
+  "ol",
+  "ul",
+  "li",
+];
+const allowedAttr = ["file", "placement", "caption", "size"];
+
+/*
+
+const {
+  tocHtmlString,
+  wikiPageTitle,
+  lastEditedTime,
+  readTime,
+  likeCount,
+  shareCount,
+  content,
+  serverIconUrl,
+  memberCount,
+  membersOnline,
+  serverCreation,
+  serverAge,
+  serverID,
+  serverOwner,
+  wikiOwner,
+  wikiAdmins,
+  wikiCreation,
+  joinLink,
+} = Astro.props;
+
+*/
+let results = {} as wikiPageData;
+let errors = [];
+
+const baseUrl = `https://raw.githubusercontent.com/diswiki/database/main/servers/${id}`;
+const fetchData = async (endpoint: string) => {
+  const response = await fetch(`${baseUrl}/${endpoint}`);
+  if (!response.ok) {
+    throw new Error("Failed to fetch data");
+  }
+  return response;
+};
+
+const [informationResponse, sidebarResponse, contentResponse] =
+  await Promise.all([
+    fetchData("information.json"),
+    fetchData("sidebar.json"),
+    fetchData("content.md"),
+  ]);
+
+const [informationData, sidebarData, contentData]: [
+  ServerInformation,
+  WikiSidebarItem,
+  string,
+] = await Promise.all([
+  await informationResponse.json(),
+  await sidebarResponse.json(),
+  await contentResponse.text(),
+]);
+
+const discordServerData = await fetchServerDetails(informationData.invite);
+if (discordServerData[1] != "none") {
+  errors.push(discordServerData[1]);
+}
+
+/*
+    tocHtmlString: string,
+*/
+
+results.wikiPageTitle = informationData.name;
+results.lastEditedTimeString = `Last edited ${formatTimestamp(
+  informationData.last_updated,
+  "relative"
+)}...`;
+results.tooltipLastEditedTimeString = formatTimestamp(
+  informationData.last_updated,
+  "normaltime"
+);
+results.readTime = avgReadTime(contentData).toString();
+results.likeCount = informationData.likes?.toString() || "?";
+results.shareCount = informationData.shares?.toString() || "?";
+results.serverCreation = formatTimestamp(
+  informationData.creation.server,
+  "normal"
+);
+results.serverID = truncate(informationData.server, 10);
+results.tooltipServerID = informationData.server;
+results.serverOwner = truncate(informationData.auth.server_owner, 10);
+results.tooltipServerOwner = informationData.auth.server_owner;
+results.wikiOwner = truncate(informationData.auth.wiki_owner, 10);
+results.tooltipWikiOwner = informationData.auth.wiki_owner;
+results.wikiCreation = formatTimestamp(informationData.creation.wiki, "normal");
+results.joinLink = `https://discord.gg/${informationData.invite}`;
+results.serverIconUrl = discordServerData[0].icon;
+results.memberCount = discordServerData[0].members.toString();
+results.membersOnline = discordServerData[0].online.toString();
+
+const [daysSince, monthsSince, yearsSince] = timeSinceTimestamp(
+  informationData.creation.server
+);
+let timeSince: string;
+
+if (yearsSince >= 1) {
+  timeSince = `${yearsSince} ${yearsSince === 1 ? "year" : "years"}`;
+} else if (monthsSince >= 1) {
+  timeSince = `${monthsSince} ${monthsSince === 1 ? "month" : "months"}`;
+} else {
+  timeSince = `${daysSince} ${daysSince === 1 ? "day" : "days"}`;
+}
+results.serverAge = timeSince;
+results.tooltipServerAge = `${daysSince.toString()} days`;
+
+let wikiAdminsHtmlString = "";
+for (let i = 0; i < informationData.auth.wiki_admins!.length; i++) {
+  let admin = informationData.auth.wiki_admins![i];
+  let truncated = truncate(admin, 10);
+  wikiAdminsHtmlString += `<wiki-user data-tooltip="${admin}" class="js-has-tooltip">${truncated}</wiki-user>`;
+}
+results.wikiAdminsHtmlString = wikiAdminsHtmlString;
+
+const contentParsed = DOMPurify.sanitize(Marked.parse(contentData), {
+  ALLOWED_TAGS: allowedTags,
+  ADD_ATTR: allowedAttr,
+});
+results.content = contentParsed;
+
+const maybeTocString = createTableOfContents(contentParsed);
+results.tocHtmlString = maybeTocString;
+---
+
+<ServerWiki results={results} errors={errors} />

@@ -1,0 +1,582 @@
+---
+import type { wikiPageData } from "../helpers/types";
+import Layout from "../layouts/Layout.astro";
+
+
+const { results, errors } = Astro.props; // TODO: errors
+const data: wikiPageData = results;
+---
+
+<Layout title="DisWiki">
+  <div id="wiki-container">
+    <div id="wiki-toc-container">
+      <h2>Table of Contents</h2>
+      <hr />
+      <ol id="wiki-toc" set:html={data.tocHtmlString}>
+        <li><a href="#"><strong>To Top</strong></a></li>
+        <!-- Variable things that are added by JavaScript -->
+      </ol>
+    </div>
+    <div id="wiki-wrapper">
+      <h1 id="wiki-page-title">{data.wikiPageTitle}</h1>
+      <hr />
+      <span id="wiki-page-info">
+        <span id="wiki-page-info-container">
+          <p
+            id="wiki-last-edited"
+            class="js-has-tooltip"
+            data-tooltip={data.tooltipLastEditedTimeString}
+          >
+            {data.lastEditedTimeString}
+          </p>
+          <span>
+            <span>
+              <i class="bx bxs-time"></i>
+              <p id="wiki-read-time">{data.readTime} minute read</p>
+            </span>
+            <span>
+              <i class="bx bxs-like"></i>
+              <p id="wiki-like-count">{data.likeCount} likes</p>
+            </span>
+            <span>
+              <i id="wiki-share" class="bx bxs-share"></i>
+              <p id="wiki-share-count">{data.shareCount} shares</p>
+            </span>
+          </span>
+        </span>
+      </span>
+      <hr />
+      <div id="wiki-content-wrapper">
+        <div id="wiki-content" set:html={data.content}>
+          <!-- Variable things that are added by JavaScript -->
+        </div>
+        <div id="wiki-sidebar">
+          <img id="wiki-sidebar-server-icon" src={data.serverIconUrl} />
+          <div class="wiki-sidebar-portion">
+            <h4>Server Info</h4>
+            <table>
+              <tr>
+                <th>Members</th>
+                <td id="wiki-sidebar-members">{data.memberCount}</td>
+              </tr>
+              <tr>
+                <th>Currently Online</th>
+                <td id="wiki-sidebar-online">{data.membersOnline}</td>
+              </tr>
+              <tr>
+                <th>Server Creation</th>
+                <td id="wiki-sidebar-server-creation">{data.serverCreation}</td>
+              </tr>
+              <tr>
+                <th>Server Age</th>
+                <td
+                  id="wiki-sidebar-server-age"
+                  class="js-has-tooltip"
+                  data-tooltip={data.tooltipServerAge}>{data.serverAge}</td
+                >
+              </tr>
+              <tr>
+                <th>Server ID</th>
+                <td id="wiki-sidebar-server-id" class="js-has-tooltip" data-tooltip={data.tooltipServerID}>{data.serverID}</td>
+              </tr>
+              <tr>
+                <th>Server Owner</th>
+                <td
+                  ><wiki-user
+                    id="wiki-sidebar-server-owner"
+                    class="js-has-tooltip"
+                    data-tooltip={data.tooltipServerOwner}
+                    >{data.serverOwner}</wiki-user
+                  ></td
+                >
+              </tr>
+            </table>
+          </div>
+          <div class="wiki-sidebar-portion">
+            <h4>Wiki Info</h4>
+            <table>
+              <tr>
+                <th>Wiki Owner</th>
+                <td
+                  ><wiki-user
+                    id="wiki-sidebar-wiki-owner"
+                    class="js-has-tooltip"
+                    data-tooltip={data.tooltipWikiOwner}
+                    >{data.wikiOwner}</wiki-user
+                  ></td
+                >
+              </tr>
+              <tr id="wiki-sidebar-wiki-admins-row">
+                <th>Wiki Admins</th>
+                <td set:html={data.wikiAdminsHtmlString} />
+              </tr>
+              <tr>
+                <th>Wiki Creation</th>
+                <td id="wiki-sidebar-wiki-creation">{data.wikiCreation}</td>
+              </tr>
+            </table>
+          </div>
+          <span
+            style="display: inline-flex; gap: 5px; margin-top: 10px; margin-bottom: 5px; width: 100%;"
+          >
+            <i
+              id="wiki-action-like"
+              class="button b-grey bx bxs-like bx-md"
+              style="flex-grow: 1; text-align: center;"></i>
+            <i
+              id="wiki-action-share"
+              class="button b-grey bx bxs-share-alt bx-md"
+              style="flex-grow: 1; text-align: center;"></i>
+            <i
+              id="wiki-action-report"
+              class="button b-grey bx bxs-error bx-md"
+              style="flex-grow: 1; text-align: center;"></i>
+          </span>
+          <a
+            id="wiki-join"
+            href={data.joinLink}
+            class="button b-blurple"
+            target="_blank">Join</a
+          >
+        </div>
+      </div>
+    </div>
+    <div id="wiki-spacer">
+      <!-- <p>hi mom</p> -->
+    </div>
+  </div>
+  <script is:inline src="https://unpkg.com/@popperjs/core@2"></script>
+  <script is:inline src="https://unpkg.com/tippy.js@6"></script>
+</Layout>
+
+<script>
+  const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
+
+  var tooltipMapping = [
+    {
+      id: "#wiki-action-like",
+      content: "Like Page",
+    },
+    {
+      id: "#wiki-action-share",
+      content: "Share Page",
+    },
+    {
+      id: "#wiki-action-report",
+      content: "Report Page",
+    },
+    {
+      id: "#wiki-last-edited",
+      dataTooltip: true,
+    },
+    {
+      id: "#wiki-sidebar-server-id",
+      dataTooltip: true,
+    },
+    {
+      id: "#wiki-sidebar-server-age",
+      dataTooltip: true,
+    },
+    {
+      id: "#wiki-sidebar-server-owner",
+      dataTooltip: true,
+    },
+    {
+      id: "#wiki-sidebar-wiki-owner",
+      dataTooltip: true,
+    },
+  ];
+
+  document.addEventListener("DOMContentLoaded", () => {
+    console.log("Setting up tooltip(s).");
+
+    for (var i = 0; i < tooltipMapping.length; i++) {
+      let currentToolip = tooltipMapping[i];
+      if (currentToolip.dataTooltip) {
+        //@ts-ignore
+        tippy(currentToolip.id, {
+          content: document
+            .querySelector(currentToolip.id)!
+            .getAttribute("data-tooltip"),
+          interactive: true,
+        });
+        continue;
+      }
+      //@ts-ignore
+      tippy(currentToolip.id, {
+        content: currentToolip.content,
+        interactive: true,
+      });
+    }
+
+    const iShouldRewriteThis = document.querySelectorAll(".js-has-tooltip");
+    for (let j = 0; j < iShouldRewriteThis.length; j++) {
+      const element = iShouldRewriteThis[j];
+      //@ts-ignore
+      tippy(element, {
+        content: element.getAttribute("data-tooltip"),
+        interactive: true,
+      });
+    }
+  });
+
+  console.log("Finished setting up tooltip(s).");
+</script>
+
+<style is:global>
+  /*
+      * Prefixed by https://autoprefixer.github.io
+      * PostCSS: v8.4.14,
+      * Autoprefixer: v10.4.7
+      * Browsers: last 4 version
+      */
+
+  :root {
+    --wiki-side-width: 14rem;
+    --c-reference-blue: #3a406e;
+  }
+
+  wiki-channel,
+  wiki-user {
+    background-color: var(--c-reference-blue);
+    padding: 0 3px;
+    border-radius: 3px;
+    display: inline-block;
+  }
+
+  wiki-channel::before {
+    content: "# ";
+  }
+
+  wiki-user::before {
+    content: "@";
+  }
+
+  hr {
+    display: block;
+    height: 1px;
+    border: 0;
+    border-top: 1px solid var(--c-lighter);
+    margin: 2.5px 0;
+    padding: 0;
+  }
+
+  #wiki-container {
+    display: -webkit-inline-box;
+    display: -ms-inline-flexbox;
+    display: inline-flex;
+    gap: 5px;
+    width: calc(100vw - 3rem);
+    margin-top: 2rem;
+    color: white;
+  }
+
+  #wiki-toc-container {
+    position: sticky;
+    min-width: var(--wiki-side-width);
+    margin-top: 5rem;
+    padding-top: 0.5rem;
+    -webkit-box-flex: 0;
+    -ms-flex-positive: 0;
+    flex-grow: 0;
+    height: -webkit-min-content;
+    height: -moz-min-content;
+    height: min-content;
+    top: 0;
+    -ms-flex-item-align: start;
+    align-self: flex-start;
+  }
+
+  #wiki-toc-container a:hover,
+  #wiki-toc-container summary:hover {
+    color: var(--c-lighter);
+  }
+
+  #wiki-toc-container summary:hover::before {
+    color: white;
+  }
+
+  #wiki-toc-container > ol li {
+    margin-left: 1rem;
+    list-style-type: none;
+  }
+
+  #wiki-toc-container > ol * {
+    margin-bottom: 2px;
+    font-size: 1.1rem;
+  }
+
+  details > summary {
+    cursor: pointer;
+  }
+  summary::marker {
+    color: var(--c-lighter);
+    font-size: 0.9rem;
+  }
+
+  #wiki-wrapper {
+    -webkit-box-flex: 1;
+    -ms-flex-positive: 1;
+    flex-grow: 1;
+  }
+
+  #wiki-page-info,
+  #wiki-page-info span {
+    display: -webkit-inline-box;
+    display: -ms-inline-flexbox;
+    display: inline-flex;
+  }
+
+  #wiki-page-info {
+    width: 100%;
+    -webkit-box-align: center;
+    -ms-flex-align: center;
+    align-items: center;
+    -webkit-box-pack: center;
+    -ms-flex-pack: center;
+    justify-content: center;
+    padding: 2.5px 0;
+    color: var(--c-lighter);
+    font-size: 0.95rem;
+  }
+
+  #wiki-page-info-container > span {
+    gap: 15px;
+  }
+
+  #wiki-page-info-container > span span {
+    gap: 2px;
+    -webkit-box-align: center;
+    -ms-flex-align: center;
+    align-items: center;
+  }
+
+  #wiki-page-info-container {
+    width: calc(100% - 1rem);
+    -webkit-box-pack: justify;
+    -ms-flex-pack: justify;
+    justify-content: space-between;
+  }
+
+  #wiki-page-title {
+    font-family: "Passion One", sans-serif;
+    font-weight: 500;
+    font-style: normal;
+    font-size: 2.75rem;
+  }
+
+  #wiki-content-wrapper {
+    display: -webkit-inline-box;
+    display: -ms-inline-flexbox;
+    display: inline-flex;
+  }
+
+  #wiki-content {
+    word-break: break-word;
+    min-height: 70svh;
+  }
+  #wiki-content table {
+    text-align: left;
+  }
+
+  #wiki-sidebar {
+    display: -webkit-box;
+    display: -ms-flexbox;
+    display: flex;
+    -webkit-box-orient: vertical;
+    -webkit-box-direction: normal;
+    -ms-flex-direction: column;
+    flex-direction: column;
+    background-color: var(--c-dark);
+    height: -webkit-min-content;
+    height: -moz-min-content;
+    height: min-content;
+    padding: 10px;
+    margin: 10px 0 10px 10px;
+    border-radius: 4px;
+  }
+
+  #wiki-sidebar-server-icon {
+    border-radius: 3px;
+    width: 14rem;
+    aspect-ratio: 1/1;
+    background-color: var(--c-darker);
+    margin-bottom: 10px;
+  }
+
+  .wiki-sidebar-portion {
+    padding-bottom: 5px;
+    width: 100%;
+  }
+
+  .wiki-sidebar-portion:last-of-type {
+    padding-bottom: 0;
+  }
+
+  .wiki-sidebar-portion > h4 {
+    text-align: center;
+    font-weight: normal;
+    width: 100%;
+    background-color: var(--c-light);
+  }
+
+  .wiki-sidebar-portion table {
+    text-align: left;
+    font-size: 0.9rem;
+    width: 100%;
+  }
+
+  .wiki-sidebar-portion table tr {
+    vertical-align: top;
+  }
+
+  .wiki-sidebar-portion table th,
+  .wiki-sidebar-portion table td {
+    padding-bottom: 2px;
+    width: 50%;
+  }
+
+  .wiki-sidebar-portion table th {
+    width: 50%;
+  }
+
+  #wiki-spacer {
+    min-width: var(--wiki-side-width);
+  }
+
+  @media only screen and (max-width: 1200px) {
+    #wiki-spacer {
+      min-width: calc(var(--wiki-side-width) / 2);
+    }
+  }
+
+  @media only screen and (max-width: 1100px) {
+    #wiki-spacer {
+      min-width: calc(var(--wiki-side-width) / 4);
+    }
+  }
+
+  @media only screen and (max-width: 1000px) {
+    #wiki-spacer {
+      display: none;
+    }
+  }
+
+  @media only screen and (max-width: 900px) {
+    #wiki-toc-container {
+      display: none;
+    }
+  }
+
+  @media only screen and (max-width: 450px) {
+    #wiki-content-wrapper {
+      display: -webkit-box;
+      display: -ms-flexbox;
+      display: flex;
+      -webkit-box-orient: vertical;
+      -webkit-box-direction: reverse;
+      -ms-flex-direction: column-reverse;
+      flex-direction: column-reverse;
+      -webkit-box-align: center;
+      -ms-flex-align: center;
+      align-items: center;
+    }
+
+    #wiki-sidebar {
+      width: calc(100% - 2rem);
+      -webkit-box-align: center;
+      -ms-flex-align: center;
+      align-items: center;
+      margin: 0;
+      margin-bottom: 10px;
+    }
+
+    #wiki-sidebar-server-icon {
+      margin-right: 0;
+      margin-bottom: 10px;
+    }
+
+    #wiki-page-info-container > span span:first-child {
+      display: none;
+    }
+
+    #wiki-container {
+      margin: 0;
+      padding: 0;
+      width: 99%;
+    }
+
+    #wiki-join {
+      width: 100%;
+    }
+  }
+  .tippy-box[data-animation="scale"][data-placement^="top"] {
+    transform-origin: bottom;
+  }
+  .tippy-box[data-animation="scale"][data-placement^="bottom"] {
+    transform-origin: top;
+  }
+  .tippy-box[data-animation="scale"][data-placement^="left"] {
+    transform-origin: right;
+  }
+  .tippy-box[data-animation="scale"][data-placement^="right"] {
+    transform-origin: left;
+  }
+  .tippy-box[data-animation="scale"][data-state="hidden"] {
+    transform: scale(0.5);
+    opacity: 0;
+  }
+
+  pre {
+    background-color: var(--c-dark);
+    border: 1px solid var(--c-darker);
+    border-radius: 4px;
+    padding: 5px;
+    display: inline-block;
+
+    white-space: pre-wrap;
+    white-space: -moz-pre-wrap;
+    white-space: -o-pre-wrap;
+    word-wrap: break-word;
+  }
+
+  wiki-image::after {
+    content: attr("caption");
+    color: red;
+  }
+
+  .nested-1 {
+    margin-left: 1.5rem;
+  }
+
+  .nested-2 {
+    margin-left: 2rem;
+  }
+
+  .nested-3 {
+    margin-left: 2.5rem;
+  }
+
+  .nested-4 {
+    margin-left: 3rem;
+  }
+
+  .nested-5 {
+    margin-left: 2.5rem;
+  }
+
+  .nested-6 {
+    margin-left: 4rem;
+  }
+
+  #wiki-content ul,
+  #wiki-content ol {
+    margin-left: 1.5rem;
+  }
+
+  #wiki-content h1 {
+    border-bottom: 1px solid var(--c-lighter-dim);
+    padding-bottom: 0;
+    margin-bottom: 0.5rem;
+  }
+</style>

@@ -50,3 +50,36 @@ export type WikiSidebarItem = {
 export type WikiSidebar = {
     content: WikiSidebarItem[];
 };
+
+export type wikiPageData = {
+    tocHtmlString: string,
+    wikiPageTitle: string,
+    lastEditedTimeString: string,
+    readTime: string,
+    likeCount: string,
+    shareCount: string,
+    content: string,
+    serverIconUrl: string,
+    memberCount: string,
+    membersOnline: string,
+    serverCreation: string,
+    serverAge: string,
+    serverID: string,
+    serverOwner: string,
+    wikiOwner: string,
+    wikiAdminsHtmlString: string,
+    wikiCreation: string,
+    joinLink: string,
+    tooltipLastEditedTimeString: string,
+    tooltipServerID: string,
+    tooltipServerAge: string,
+    tooltipServerOwner: string,
+    tooltipWikiOwner: string
+
+};
+
+export type discordApiServerInfo = {
+    icon: string,
+    members: number,
+    online: number
+}

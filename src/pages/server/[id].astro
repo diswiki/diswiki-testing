@@ -1,6 +1,7 @@
 ---
 import * as db from "../../lib/wikis";
 import ServerWiki from "../../components/ServerWiki.astro";
+import Layout from "../../layouts/Layout.astro";
 import type {
   wikiPageData,
   ServerInformation,
@@ -19,9 +20,7 @@ import { fetchServerDetails } from "../../helpers/discord";
 import DOMPurify from "isomorphic-dompurify";
 import { Marked } from "@ts-stack/markdown";
 
-// Find a better way to do this, this is a heavy
-// operation that gets ran every request. Maybe
-// make use of caching or Astro collections.
+// This only runs at build time; SSG is fun. - QAEZZ
 export async function getStaticPaths() {
   return await db.returnStaticPathsID();
 }
@@ -57,33 +56,10 @@ const allowedTags = [
   "ol",
   "ul",
   "li",
+  "div"
 ];
-const allowedAttr = ["file", "placement", "caption", "size"];
+const allowedAttr = ["file", "placement", "caption", "size", "id", "name", "class", "src", "alt", "width", "style"];
 
-/*
-
-const {
-  tocHtmlString,
-  wikiPageTitle,
-  lastEditedTime,
-  readTime,
-  likeCount,
-  shareCount,
-  content,
-  serverIconUrl,
-  memberCount,
-  membersOnline,
-  serverCreation,
-  serverAge,
-  serverID,
-  serverOwner,
-  wikiOwner,
-  wikiAdmins,
-  wikiCreation,
-  joinLink,
-} = Astro.props;
-
-*/
 let results = {} as wikiPageData;
 let errors = [];
 
@@ -105,7 +81,7 @@ const [informationResponse, sidebarResponse, contentResponse] =
 
 const [informationData, sidebarData, contentData]: [
   ServerInformation,
-  WikiSidebarItem,
+  WikiSidebar,
   string,
 ] = await Promise.all([
   await informationResponse.json(),
@@ -118,25 +94,21 @@ if (discordServerData[1] != "none") {
   errors.push(discordServerData[1]);
 }
 
-/*
-    tocHtmlString: string,
-*/
-
 results.wikiPageTitle = informationData.name;
 results.lastEditedTimeString = `Last edited ${formatTimestamp(
   informationData.last_updated,
-  "relative"
+  "relative",
 )}...`;
 results.tooltipLastEditedTimeString = formatTimestamp(
   informationData.last_updated,
-  "normaltime"
+  "normaltime",
 );
 results.readTime = avgReadTime(contentData).toString();
 results.likeCount = informationData.likes?.toString() || "?";
 results.shareCount = informationData.shares?.toString() || "?";
 results.serverCreation = formatTimestamp(
   informationData.creation.server,
-  "normal"
+  "normal",
 );
 results.serverID = truncate(informationData.server, 10);
 results.tooltipServerID = informationData.server;
@@ -151,16 +123,14 @@ results.memberCount = discordServerData[0].members.toString();
 results.membersOnline = discordServerData[0].online.toString();
 
 const [daysSince, monthsSince, yearsSince] = timeSinceTimestamp(
-  informationData.creation.server
+  informationData.creation.server,
 );
-let timeSince: string;
+let timeSince = `${daysSince} ${daysSince === 1 ? "day" : "days"}`;
 
 if (yearsSince >= 1) {
   timeSince = `${yearsSince} ${yearsSince === 1 ? "year" : "years"}`;
 } else if (monthsSince >= 1) {
   timeSince = `${monthsSince} ${monthsSince === 1 ? "month" : "months"}`;
-} else {
-  timeSince = `${daysSince} ${daysSince === 1 ? "day" : "days"}`;
 }
 results.serverAge = timeSince;
 results.tooltipServerAge = `${daysSince.toString()} days`;
@@ -181,6 +151,65 @@ results.content = contentParsed;
 
 const maybeTocString = createTableOfContents(contentParsed);
 results.tocHtmlString = maybeTocString;
+
+let sidebarHtmlStrings = [];
+for (let i = 0; i < sidebarData.content.length; i++) {
+  let portion = sidebarData.content[i];
+  const fields = () => {
+    let fieldsHtmlStrings = [];
+    for (let j = 0; j < portion.fields.length; j++) {
+      let field = portion.fields[j];
+      fieldsHtmlStrings.push(`
+      <tr>
+        <th>${field.name}</th>
+        <td>${field.value}</td>
+      </tr>
+      `);
+    }
+    return fieldsHtmlStrings;
+  };
+
+  const fieldsHtmlString = fields().slice(0,3).join('');
+
+  const images = () => {
+    let imagesHtmlStrings = [];
+    for (let k = 0; k < portion.images.length; k++) {
+      let image = portion.images[k];
+      imagesHtmlStrings.push(`
+      <wiki-image file="${image.name}" placement="break">${image.caption}</wiki-image>
+      `);
+    }
+    return imagesHtmlStrings;
+  };
+
+  const imagesHtmlString = images().slice(0,3).join('');
+
+  let tableHtmlString = `<table>${fieldsHtmlString}</table>`;
+  let finalHtmlString;
+  if (portion.images_above_content) {
+    // The + operator is faster than concat, interesting... - QAEZZ
+    finalHtmlString = imagesHtmlString + tableHtmlString;
+  } else {
+    finalHtmlString = tableHtmlString + imagesHtmlString;
+  }
+
+  sidebarHtmlStrings.push(`
+    <div class="wiki-sidebar-portion">
+      <h4>${portion.header}</h4>
+      ${finalHtmlString}
+    </div>
+  `);
+}
+
+results.sidebarHtmlString = DOMPurify.sanitize(
+  sidebarHtmlStrings.slice(0, 3).join(""),
+  {
+    ALLOWED_TAGS: allowedTags,
+    ADD_ATTR: allowedAttr,
+  },
+);
 ---
 
-<ServerWiki results={results} errors={errors} />
+<Layout title=`DisWiki - ${results.wikiPageTitle}`>
+  <ServerWiki results={results} errors={errors.reverse()} />
+</Layout>

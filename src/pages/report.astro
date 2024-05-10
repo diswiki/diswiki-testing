@@ -124,9 +124,10 @@ import Layout from "../layouts/Layout.astro";
                         </div>
                     </label>
                     <label aria-required="true">
-                        <p>Add proper text area, vertical scale only.</p>
+                        <p>Why are you reporting it? Reasoning, proof, etc.</p>
                         <textarea
                                 name="about"
+                                rows="5"
                                 required
                             />
                     </label>
@@ -237,6 +238,17 @@ import Layout from "../layouts/Layout.astro";
         font-size: 1rem;
         border: 1px solid var(--c-darker);
         background-color: var(--c-dark);
+    }
+    .modal > .content-wrapper > .content label > textarea {
+        font-family: Arial, Helvetica, sans-serif;
+        resize: vertical;
+        background-color: var(--c-dark);
+        border: 1px solid var(--c-darker);
+        outline: none;
+        color: whitesmoke;
+        padding: 7px;
+        font-size: 1rem;
+        border-radius: 3px;
     }
     .modal > .content-wrapper > .content label > .radio-choices {
         display: grid;

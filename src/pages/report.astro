@@ -1,0 +1,310 @@
+---
+import Layout from "../layouts/Layout.astro";
+---
+
+<Layout title="Report a Wiki Page">
+    <div id="overlay">
+        <!-- <div class="modal"> -->
+        <form
+            class="modal"
+            action="/api/v1/report"
+            method="get"
+            autocomplete="off"
+        >
+            <div class="content-wrapper">
+                <div class="content">
+                    <span>
+                        <img src="/favicon.ico" />
+                        <h1>Report a Wiki Page</h1>
+                        <i class="bx bx-x bx-md"></i>
+                    </span>
+                    <div class="warning">
+                        <i class="bx bxs-error-circle bx-md"></i>
+                        <p>
+                            This form will be submited to <strong
+                                >DisWiki Staff</strong
+                            >. Do not share passwords or other sensitive
+                            information.
+                        </p>
+                    </div>
+                    <label aria-required="true">
+                        <p>What's the wiki page link?</p>
+                        <input
+                            type="text"
+                            name="link"
+                            placeholder="https://diswiki.com/xxxx/xxxxxxxxxxx"
+                            required
+                        />
+                    </label>
+                    <label aria-required="true">
+                        <p>What's your Discord user ID?</p>
+                        <input type="text" name="reporter-uid" required />
+                    </label>
+                    <label aria-required="true">
+                        <p>What's a good contact email for you?</p>
+                        <input
+                            type="email"
+                            name="link"
+                            placeholder="user@example.com"
+                            required
+                        />
+                    </label>
+                    <label aria-required="true">
+                        <p>What's the reason for reporting this page?</p>
+                        <div class="radio-choices">
+                            <div class="radio-choice">
+                                <input
+                                    type="radio"
+                                    id="reportReason1"
+                                    name="report-reason"
+                                    value="abuse-or-harassment"
+                                    required
+                                />
+                                <label for="reportReason1"
+                                    >Abuse or Harassment</label
+                                >
+                            </div>
+                            <div class="radio-choice">
+                                <input
+                                    type="radio"
+                                    id="reportReason2"
+                                    name="report-reason"
+                                    value="harmful-misinformation"
+                                    required
+                                />
+                                <label for="reportReason2"
+                                    >Harmful Misinformation</label
+                                >
+                            </div>
+                            <div class="radio-choice">
+                                <input
+                                    type="radio"
+                                    id="reportReason3"
+                                    name="report-reason"
+                                    value="glorifying-violence"
+                                    required
+                                />
+                                <label for="reportReason3"
+                                    >Glorifying Violence</label
+                                >
+                            </div>
+                            <div class="radio-choice">
+                                <input
+                                    type="radio"
+                                    id="reportReason4"
+                                    name="report-reason"
+                                    value="sexual-content"
+                                    required
+                                />
+                                <label for="reportReason4">Sexual Content</label
+                                >
+                            </div>
+                            <div class="radio-choice">
+                                <input
+                                    type="radio"
+                                    id="reportReason5"
+                                    name="report-reason"
+                                    value="gore-shock-content"
+                                    required
+                                />
+                                <label for="reportReason5"
+                                    >Gore/Shock Content</label
+                                >
+                            </div>
+                            <div class="radio-choice">
+                                <input
+                                    type="radio"
+                                    id="reportReason6"
+                                    name="report-reason"
+                                    value="other"
+                                    required
+                                />
+                                <label for="reportReason6">Other</label>
+                            </div>
+                        </div>
+                    </label>
+                    <label aria-required="true">
+                        <p>Why are you reporting it? Reasoning, proof, etc.</p>
+                        <textarea
+                                name="about"
+                                rows="5"
+                                required
+                            />
+                    </label>
+                </div>
+            </div>
+            <div class="actions-wrapper">
+                <div class="actions">
+                    <a class="button">Cancel</a>
+                    <button type="submit" class="button b-blurple"
+                        >Submit</button
+                    >
+                </div>
+            </div>
+        </form>
+        <!-- </div> -->
+    </div>
+</Layout>
+
+<style>
+    :root {
+        --padding-modal: 1rem;
+        --border-radius-modal: 7px;
+    }
+
+    #overlay {
+        position: relative;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        z-index: 1;
+        background-color: rgba(0, 0, 0, 0.5);
+        display: flex;
+        justify-content: center;
+        padding: 2rem;
+    }
+    .modal {
+        color: whitesmoke;
+        width: 30rem;
+    }
+    .modal > .content-wrapper {
+        background-color: var(--c-bg);
+        width: 100%;
+        padding: var(--padding-modal);
+        border-radius: var(--border-radius-modal) var(--border-radius-modal) 0 0;
+    }
+    .modal > .content-wrapper > .content {
+        display: flex;
+        flex-direction: column;
+        gap: 15px;
+    }
+    .modal > .content-wrapper > .content > span {
+        width: 100%;
+        display: inline-flex;
+        gap: 5px;
+        align-items: center;
+    }
+    .modal > .content-wrapper > .content > span > h1 {
+        font-size: 1.7rem;
+        font-weight: 500;
+    }
+    .modal > .content-wrapper > .content > span > img {
+        border-radius: 100%;
+        aspect-ratio: 1/1;
+    }
+    .modal > .content-wrapper > .content > span > i {
+        margin-left: auto;
+    }
+    .modal > .content-wrapper > .content > .warning {
+        display: inline-flex;
+        border: 1px solid var(--c-yellow);
+        background-color: rgba(247, 169, 57, 0.1);
+        border-radius: 5px;
+        padding: 10px 5px;
+        gap: 10px;
+        font-weight: 500;
+    }
+    .modal > .content-wrapper > .content > .warning > i {
+        color: var(--c-yellow);
+    }
+    .modal > .content-wrapper > .content label {
+        display: flex;
+        flex-direction: column;
+        gap: 5px;
+    }
+    .modal
+        > .content-wrapper
+        > .content
+        label[aria-required="true"]
+        > p::after {
+        content: " *";
+        color: var(--c-red);
+    }
+    .modal > .content-wrapper > .content label > p {
+        text-transform: uppercase;
+        color: var(--c-lighter);
+        font-weight: bold;
+        font-size: 0.95rem;
+        transform: scale(1, 0.95);
+    }
+    .modal > .content-wrapper > .content label > input[type="text"],
+    .modal > .content-wrapper > .content label > input[type="email"] {
+        padding: 7px;
+        color: whitesmoke;
+        outline: none;
+        border-style: none;
+        border-radius: 3px;
+        font-size: 1rem;
+        border: 1px solid var(--c-darker);
+        background-color: var(--c-dark);
+    }
+    .modal > .content-wrapper > .content label > textarea {
+        font-family: Arial, Helvetica, sans-serif;
+        resize: vertical;
+        background-color: var(--c-dark);
+        border: 1px solid var(--c-darker);
+        outline: none;
+        color: whitesmoke;
+        padding: 7px;
+        font-size: 1rem;
+        border-radius: 3px;
+    }
+    .modal > .content-wrapper > .content label > .radio-choices {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        margin: 0 auto;
+        gap: 5px;
+    }
+    .modal > .content-wrapper > .content label > .radio-choices .radio-choice {
+        display: inline-flex;
+        gap: 7px;
+        align-items: center;
+        color: var(--c-lighter);
+    }
+    /* https://stackoverflow.com/a/24518247/14363702 - THANK YOU! */
+    .modal > .content-wrapper > .content label > .radio-choices .radio-choice input[type="radio"] {
+        box-sizing: border-box;
+        appearance: none;
+        background: var(--c-dark);
+        outline: 1px solid var(--c-darker);
+        width: 1.5rem;
+        height: 1.5rem;
+        border-radius: 5px;
+    }
+
+    .modal > .content-wrapper > .content label > .radio-choices .radio-choice input[type="radio"]:checked {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        background: var(--c-blurple);
+    }
+    /* https://stackoverflow.com/a/60322224/14363702 - THANK YOU */
+    .modal > .content-wrapper > .content label > .radio-choices .radio-choice input[type="radio"]:checked::after {
+        content: '';
+        display: inline-block;
+        transform: rotate(45deg);
+        height: 15px;
+        width: 5px;
+        margin-bottom: 5%;
+        border-bottom: 2px solid whitesmoke;
+        border-right: 2px solid whitesmoke;
+    }
+
+    .modal > .actions-wrapper {
+        background-color: #2f3136;
+        width: 100%;
+        padding: var(--padding-modal);
+        border-radius: 0 0 var(--border-radius-modal) var(--border-radius-modal);
+    }
+    .modal > .actions-wrapper > .actions {
+        display: inline-flex;
+        width: 100%;
+        justify-content: end;
+        gap: 5px;
+    }
+    .modal > .actions-wrapper > .actions > button {
+        color: whitesmoke;
+        border-style: none;
+    }
+</style>

@@ -1,0 +1,74 @@
+---
+// grab values from .env file
+// const { DISCORD_CLIENT_ID, DISCORD_REDIRECT } = import.meta.env;
+// const DISCORD_CLIENT_ID = "1238157849381699625"
+// const DISCORD_REDIRECT = "https://127.0.0.1:4321/authtest"
+
+// build discord auth url
+const discord_oauth_url =
+    "https://discord.com/oauth2/authorize?client_id=1238157849381699625&response_type=code&redirect_uri=http%3A%2F%2Flocalhost%3A4321%2Fauthtest&scope=identify+guilds";
+let logoutPage = Astro.props.logoutPage || "/logout";
+---
+
+<div id="user-logged-out" style="display:none;">
+    <a href={discord_oauth_url} class="button b-blurple">Sign in</a>
+</div>
+<div id="user-logged-in" style="display:none;">
+    <a onclick="logout()" class="button b-blurple">Sign Out</a>
+</div>
+
+<script is:inline
+    src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.24.0/moment.min.js"
+    type="text/javascript"></script>
+<script define:vars={{ logoutPage }}>
+
+    let expires = localStorage.getItem("expires") || 0;
+    let m_expires = moment(expires);
+    let now = moment();
+
+    if (now.isBefore(m_expires)) {
+        document.getElementById("user-logged-in").style.display = "";
+        var user = JSON.parse(localStored.getItem("discord_user"));
+        alert(user.username);
+    } else {
+        document.getElementById("user-logged-out").style.display = "";
+    }
+
+    function logout() {
+        localStorage.setItem("disord_user", false);
+        localStorage.setItem("expires", 0);
+        window.location = logoutPage;
+    }
+
+    // var expires = localStorage.getItem("expires") || 0;
+    // var m_expires = moment(expires);
+    // var now = moment();
+    // if (now.isBefore(m_expires)) {
+    //     document.getElementById("user-logged-in").style.display = "";
+    //     var user = JSON.parse(localStorage.getItem("discord_user"));
+    //     document.getElementById('username').innerText = user.username;
+    //     document.getElementById("user-avatar").src =
+    //         "https://cdn.discordapp.com/avatars/" +
+    //         user.id +
+    //         "/" +
+    //         user.avatar +
+    //         ".png";
+    // } else {
+    //     document.getElementById("user-logged-out").style.display = "";
+    // }
+    // document
+    //     .getElementById("action-logout")
+    //     .addEventListener("click", function () {
+    //         localStorage.setItem("discord_user", false);
+    //         localStorage.setItem("expires", "0");
+    //         window.location = logoutPage;
+    //     });
+</script>
+
+<style scoped>
+    #user-logged-out a,
+    #user-logged-out a:visited {
+        color: #ffa;
+        text-decoration: none;
+    }
+</style>

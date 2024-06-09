@@ -1,5 +1,5 @@
 ---
-
+import AuthUser from "./AuthUser.astro";
 ---
 
 <nav>
@@ -44,7 +44,7 @@
         </div>
         <div class="portion">
             <span>
-                <a href="#" class="button b-blurple">Sign in</a>
+                <AuthUser logoutPage="/logout" />
             </span>
         </div>
     </div>
@@ -72,6 +72,7 @@
         height: 5rem;
         min-height: 5rem;
         width: 100vw;
+        z-index: 5;
     }
 
     #nav-container {
